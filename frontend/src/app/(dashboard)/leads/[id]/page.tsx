@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select';
 import { InteractionTimeline } from '@/features/interactions/components/InteractionTimeline';
 import { TaskList } from '@/features/tasks/components/TaskList';
+import { WhatsAppButton } from '@/features/leads/components/WhatsAppButton';
+import { EmailButton } from '@/features/leads/components/EmailButton';
 
 export default function LeadDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -130,20 +132,26 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
                   <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-md">
                     <Phone className="w-4 h-4 text-slate-500" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-muted-foreground">Phone Number</p>
                     <p className="text-sm font-medium">{lead.phone_number}</p>
                   </div>
+                  {lead.phone_number && (
+                    <WhatsAppButton phoneNumber={lead.phone_number} />
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
                   <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-md">
                     <Mail className="w-4 h-4 text-slate-500" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-xs text-muted-foreground">Email Address</p>
                     <p className="text-sm font-medium">{lead.email || '—'}</p>
                   </div>
+                  {lead.email && (
+                    <EmailButton email={lead.email} variant="outline" size="sm" />
+                  )}
                 </div>
               </CardContent>
             </Card>

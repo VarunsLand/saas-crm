@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search, Target } from 'lucide-react';
 import { LeadStatusBadge } from './LeadStatusBadge';
+import { WhatsAppButton } from './WhatsAppButton';
+import { EmailButton } from './EmailButton';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Table,
@@ -108,8 +110,18 @@ export function LeadList() {
                       {lead.first_name} {lead.last_name}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{lead.email || '—'}</div>
-                      <div className="text-xs text-muted-foreground">{lead.phone_number}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{lead.email || '—'}</span>
+                        {lead.email && (
+                          <EmailButton email={lead.email} className="w-5 h-5 min-h-0 min-w-0" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted-foreground">{lead.phone_number}</span>
+                        {lead.phone_number && (
+                          <WhatsAppButton phoneNumber={lead.phone_number} className="w-5 h-5 min-h-0 min-w-0" />
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <LeadStatusBadge status={lead.status} />
