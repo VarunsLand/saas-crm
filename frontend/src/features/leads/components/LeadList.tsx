@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { useLeads } from '../hooks/useLeads';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Search, Target } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Search, Target, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import { WhatsAppButton } from './WhatsAppButton';
 import { EmailButton } from './EmailButton';
 import { LeadAvatar } from './LeadAvatar';
@@ -25,6 +28,7 @@ export function LeadList() {
   const { data, isLoading, isError } = useLeads();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   if (isLoading) {
     return (
@@ -55,8 +59,30 @@ export function LeadList() {
 
   const leads = data?.data?.leads || [];
 
-  // Local Search Filter
+  // Calculate counts for filters
+  const counts = {
+    ALL: leads.length,
+    NEW: leads.filter((l) => l.status === 'NEW').length,
+    IN_PROGRESS: leads.filter((l) => l.status === 'IN_PROGRESS').length,
+    WON: leads.filter((l) => l.status === 'WON').length,
+    LOST: leads.filter((l) => l.status === 'LOST').length,
+  };
+
+  const filters = [
+    { id: 'ALL', label: 'All' },
+    { id: 'NEW', label: 'New' },
+    { id: 'IN_PROGRESS', label: 'In Progress' },
+    { id: 'WON', label: 'Won' },
+    { id: 'LOST', label: 'Lost' },
+  ];
+
+  // Combined Search and Status Filter
   const filteredLeads = leads.filter((lead) => {
+    const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
+    if (!matchesStatus) return false;
+
+    if (!searchTerm) return true;
+    
     const fullName = `${lead.first_name} ${lead.last_name || ''}`.toLowerCase();
     const email = (lead.email || '').toLowerCase();
     const phone = (lead.phone_number || '').toLowerCase();
@@ -65,18 +91,86 @@ export function LeadList() {
     return fullName.includes(search) || email.includes(search) || phone.includes(search);
   });
 
+  const handleExportCSV = () => {
+    if (filteredLeads.length === 0) return;
+
+    const headers = ['Name', 'Email', 'Phone', 'Status', 'Created Date'];
+    const rows = filteredLeads.map((lead) => [
+      `"${(lead.first_name + ' ' + (lead.last_name || '')).trim()}"`,
+      `"${lead.email || ''}"`,
+      `"${lead.phone_number || ''}"`,
+      `"${lead.status}"`,
+      `"${new Date(lead.created_at).toLocaleDateString()}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute('download', `leads-export-${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success(`Exported ${filteredLeads.length} leads successfully`);
+  };
+
   return (
     <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
       <CardContent className="p-0">
-        <div className="p-4 border-b">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search leads by name, email, or phone..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/20 rounded-t-2xl">
+          <div className="flex items-center gap-1 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {filters.map((filter) => {
+              const isActive = statusFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => setStatusFilter(filter.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
+                    isActive 
+                      ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] border border-slate-200/60 dark:border-slate-700" 
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 border border-transparent"
+                  )}
+                >
+                  {filter.label}
+                  <span className={cn(
+                    "px-1.5 py-0.5 rounded-full text-xs",
+                    isActive 
+                      ? "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300" 
+                      : "bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400"
+                  )}>
+                    {counts[filter.id as keyof typeof counts]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+            <div className="relative w-full sm:max-w-xs shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search leads..."
+                className="pl-9 h-9 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus-visible:ring-indigo-500 rounded-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-full bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 shrink-0"
+              onClick={handleExportCSV}
+              disabled={filteredLeads.length === 0}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { DashboardMetrics } from '@/features/dashboard/components/DashboardMetrics';
 import { DashboardActivity } from '@/features/dashboard/components/DashboardActivity';
+import { DashboardCharts } from '@/features/dashboard/components/DashboardCharts';
 
 export default function DashboardPage() {
   const { currentUser } = useAuth();
@@ -26,7 +27,12 @@ export default function DashboardPage() {
           <DashboardMetrics />
         </section>
 
-        {/* Middle Section: Activity Timeline */}
+        {/* Charts Section: Lead Analytics */}
+        <section>
+          <DashboardCharts />
+        </section>
+
+        {/* Activity Timeline */}
         <section className="min-h-[400px]">
           <DashboardActivity />
         </section>
