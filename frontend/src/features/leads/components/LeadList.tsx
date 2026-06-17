@@ -5,9 +5,11 @@ import { useLeads } from '../hooks/useLeads';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search, Target } from 'lucide-react';
-import { LeadStatusBadge } from './LeadStatusBadge';
 import { WhatsAppButton } from './WhatsAppButton';
 import { EmailButton } from './EmailButton';
+import { LeadAvatar } from './LeadAvatar';
+import { LeadStatusBadge } from './LeadStatusBadge';
+import { CopyButton } from '@/components/ui/copy-button';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Table,
@@ -91,8 +93,8 @@ export function LeadList() {
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50">
-                <TableRow className="hover:bg-transparent">
+              <TableHeader className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+                <TableRow className="hover:bg-transparent border-none">
                   <TableHead className="font-medium">Name</TableHead>
                   <TableHead className="font-medium">Contact Info</TableHead>
                   <TableHead className="font-medium">Status</TableHead>
@@ -103,23 +105,32 @@ export function LeadList() {
                 {filteredLeads.map((lead) => (
                   <TableRow
                     key={lead.id}
-                    className="cursor-pointer transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                    className="cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b border-slate-100 dark:border-slate-800/50 last:border-0"
                     onClick={() => router.push(`/leads/${lead.id}`)}
                   >
                     <TableCell className="font-medium text-slate-900 dark:text-slate-100">
-                      {lead.first_name} {lead.last_name}
+                      <div className="flex items-center gap-3">
+                        <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} />
+                        <span>{lead.first_name} {lead.last_name}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="text-sm">{lead.email || '—'}</span>
                         {lead.email && (
-                          <EmailButton email={lead.email} className="w-5 h-5 min-h-0 min-w-0" />
+                          <>
+                            <CopyButton text={lead.email} className="w-5 h-5" />
+                            <EmailButton email={lead.email} className="w-5 h-5 min-h-0 min-w-0" />
+                          </>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs text-muted-foreground">{lead.phone_number}</span>
                         {lead.phone_number && (
-                          <WhatsAppButton phoneNumber={lead.phone_number} className="w-5 h-5 min-h-0 min-w-0" />
+                          <>
+                            <CopyButton text={lead.phone_number} className="w-5 h-5" />
+                            <WhatsAppButton phoneNumber={lead.phone_number} className="w-5 h-5 min-h-0 min-w-0" />
+                          </>
                         )}
                       </div>
                     </TableCell>

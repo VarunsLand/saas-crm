@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useUsers } from '../hooks/useUsers';
 import { User, UserRole } from '../types';
+import { LeadAvatar } from '@/features/leads/components/LeadAvatar';
+import { CopyButton } from '@/components/ui/copy-button';
 import { format } from 'date-fns';
 import { AlertCircle, Search, ShieldCheck, Users as UsersIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -63,7 +65,7 @@ export function UsersList() {
         </div>
       </div>
 
-      <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
+      <Card>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="p-0">
@@ -94,9 +96,9 @@ export function UsersList() {
           ) : (
             <div className="relative w-full overflow-auto">
               <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b bg-slate-50/50 dark:bg-slate-900/50">
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                <thead className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
+                  <tr className="border-none">
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">User</th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Role</th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Created</th>
@@ -105,11 +107,17 @@ export function UsersList() {
                 </thead>
                 <tbody className="[&_tr:last-child]:border-0">
                   {filteredUsers.map((user: User) => (
-                    <tr key={user.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <tr key={user.id} className="border-b border-slate-100 dark:border-slate-800/50 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
                       <td className="p-4 align-middle">
-                        <div className="flex flex-col">
-                          <span className="font-medium">{user.first_name} {user.last_name}</span>
-                          <span className="text-xs text-muted-foreground">{user.email}</span>
+                        <div className="flex items-center gap-3">
+                          <LeadAvatar firstName={user.first_name} lastName={user.last_name} className="h-9 w-9" />
+                          <div className="flex flex-col">
+                            <span className="font-medium text-slate-900 dark:text-slate-100">{user.first_name} {user.last_name}</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-xs text-muted-foreground">{user.email}</span>
+                              <CopyButton text={user.email} className="w-4 h-4 text-slate-300 hover:text-slate-500" />
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="p-4 align-middle">

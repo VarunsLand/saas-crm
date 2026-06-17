@@ -12,7 +12,7 @@ export function DashboardMetrics() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
+          <Card key={i} className="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-900/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
               <div className="h-8 w-8 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse" />
@@ -80,13 +80,13 @@ export function DashboardMetrics() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
-        <Card key={item.title} className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
+        <Card key={item.title} className="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-900/50 relative overflow-hidden group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-500 dark:text-slate-400">
               {item.title}
             </CardTitle>
-            <div className={`p-2 rounded-full ${item.bgColor}`}>
-              <item.icon className={`h-4 w-4 ${item.color}`} />
+            <div className={`p-2.5 rounded-xl ${item.bgColor} transition-transform group-hover:scale-110`}>
+              <item.icon className={`h-5 w-5 ${item.color}`} />
             </div>
           </CardHeader>
           <CardContent>

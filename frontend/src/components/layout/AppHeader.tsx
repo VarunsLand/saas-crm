@@ -21,7 +21,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const { currentUser, isUserLoading, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-md px-4 sm:px-6 shadow-sm transition-all">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-4 sm:px-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.02)] transition-all">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
           <Menu className="h-5 w-5" />

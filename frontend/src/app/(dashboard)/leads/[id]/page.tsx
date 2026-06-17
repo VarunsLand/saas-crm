@@ -20,6 +20,8 @@ import { InteractionTimeline } from '@/features/interactions/components/Interact
 import { TaskList } from '@/features/tasks/components/TaskList';
 import { WhatsAppButton } from '@/features/leads/components/WhatsAppButton';
 import { EmailButton } from '@/features/leads/components/EmailButton';
+import { LeadAvatar } from '@/features/leads/components/LeadAvatar';
+import { CopyButton } from '@/components/ui/copy-button';
 
 export default function LeadDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -71,10 +73,13 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 flex items-center gap-3">
-                {lead.first_name} {lead.last_name}
-                <LeadStatusBadge status={lead.status} />
-              </h1>
+              <div className="flex items-center gap-4">
+                <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} className="h-12 w-12 text-lg" />
+                <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                  {lead.first_name} {lead.last_name}
+                  <LeadStatusBadge status={lead.status} />
+                </h1>
+              </div>
               <p className="text-muted-foreground text-sm flex items-center mt-1">
                 <Clock className="w-3 h-3 mr-1" />
                 Added on {format(new Date(lead.created_at), 'PPP')}
@@ -137,7 +142,10 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
                     <p className="text-sm font-medium">{lead.phone_number}</p>
                   </div>
                   {lead.phone_number && (
-                    <WhatsAppButton phoneNumber={lead.phone_number} />
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={lead.phone_number} />
+                      <WhatsAppButton phoneNumber={lead.phone_number} variant="outline" size="sm" />
+                    </div>
                   )}
                 </div>
 
@@ -150,7 +158,10 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
                     <p className="text-sm font-medium">{lead.email || '—'}</p>
                   </div>
                   {lead.email && (
-                    <EmailButton email={lead.email} variant="outline" size="sm" />
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={lead.email} />
+                      <EmailButton email={lead.email} variant="outline" size="sm" />
+                    </div>
                   )}
                 </div>
               </CardContent>

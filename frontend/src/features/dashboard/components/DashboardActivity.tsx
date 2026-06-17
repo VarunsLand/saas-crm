@@ -11,7 +11,7 @@ export function DashboardActivity() {
 
   if (isLoading) {
     return (
-      <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
+      <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
@@ -48,7 +48,7 @@ export function DashboardActivity() {
   const activities = data?.data?.activity || [];
 
   return (
-    <Card className="h-full flex flex-col shadow-sm border-slate-200/60 dark:border-slate-800/60">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
