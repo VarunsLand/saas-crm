@@ -154,6 +154,32 @@ class LeadService {
 
     return { importedCount, skippedCount };
   }
+
+  /**
+   * Soft delete a lead.
+   * @param {string} tenantId - The UUID of the tenant
+   * @param {string} leadId - The UUID of the lead
+   */
+  static async deleteLead(tenantId, leadId) {
+    // 1. Verify existence and tenant ownership
+    const existingLead = await prisma.lead.findFirst({
+      where: {
+        id: leadId,
+        tenant_id: tenantId,
+        deleted_at: null
+      }
+    });
+
+    if (!existingLead) {
+      throw new ApiError(404, 'Lead not found or access denied');
+    }
+
+    // 2. Perform the soft delete securely using the verified PK
+    return prisma.lead.update({
+      where: { id: leadId },
+      data: { deleted_at: new Date() }
+    });
+  }
 }
 
 module.exports = LeadService;

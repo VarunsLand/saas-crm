@@ -154,3 +154,22 @@ export const useImportLeads = () => {
     },
   });
 };
+
+export const useDeleteLead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => leadsService.deleteLead(id),
+    onSuccess: (_, id) => {
+      toast.success('Lead deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      queryClient.removeQueries({ queryKey: ['leads', id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardMetrics'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardActivity'] });
+    },
+    onError: (error: ApiError) => {
+      const message = error.response?.data?.message || 'Failed to delete lead';
+      toast.error(message);
+    },
+  });
+};

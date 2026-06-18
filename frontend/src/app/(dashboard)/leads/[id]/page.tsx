@@ -2,6 +2,7 @@
 
 import { use } from 'react';
 import { useLead, useUpdateLeadStatus } from '@/features/leads/hooks/useLeads';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, User, Phone, Mail, Clock } from 'lucide-react';
 import Link from 'next/link';
@@ -23,6 +24,7 @@ import { EmailButton } from '@/features/leads/components/EmailButton';
 import { LeadAvatar } from '@/features/leads/components/LeadAvatar';
 import { CopyButton } from '@/components/ui/copy-button';
 import { LeadDescriptionCard } from '@/features/leads/components/LeadDescriptionCard';
+import { DeleteLeadDialog } from '@/features/leads/components/DeleteLeadDialog';
 
 export default function LeadDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -30,6 +32,7 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
 
   const { data, isLoading, isError } = useLead(leadId);
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateLeadStatus();
+  const { currentUser } = useAuth();
 
   if (isLoading) {
     return (
@@ -87,6 +90,11 @@ export default function LeadDetailsPage({ params }: { params: Promise<{ id: stri
               </p>
             </div>
           </div>
+          {currentUser?.role === 'ADMIN' && (
+            <div className="flex-shrink-0">
+              <DeleteLeadDialog leadId={lead.id} triggerContext="button" redirectOnSuccess={true} />
+            </div>
+          )}
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

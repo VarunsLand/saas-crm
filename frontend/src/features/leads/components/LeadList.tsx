@@ -5,7 +5,7 @@ import { useLeads } from '../hooks/useLeads';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Search, Target, Download } from 'lucide-react';
+import { Search, Target, Download, MoreHorizontal, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { WhatsAppButton } from './WhatsAppButton';
@@ -14,6 +14,8 @@ import { LeadAvatar } from './LeadAvatar';
 import { LeadStatusBadge } from './LeadStatusBadge';
 import { CopyButton } from '@/components/ui/copy-button';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { DeleteLeadDialog } from './DeleteLeadDialog';
 import {
   Table,
   TableBody,
@@ -23,9 +25,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export function LeadList() {
   const { data, isLoading, isError } = useLeads();
+  const { currentUser } = useAuth();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -193,19 +203,21 @@ export function LeadList() {
                   <TableHead className="font-medium">Contact Info</TableHead>
                   <TableHead className="font-medium">Status</TableHead>
                   <TableHead className="font-medium">Created</TableHead>
+                  <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLeads.map((lead) => (
                   <TableRow
                     key={lead.id}
-                    className="cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted border-b border-slate-100 dark:border-slate-800/50 last:border-0"
-                    onClick={() => router.push(`/leads/${lead.id}`)}
+                    className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800/50 last:border-0"
                   >
                     <TableCell className="font-medium text-slate-900 dark:text-slate-100">
                       <div className="flex items-center gap-3">
                         <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} />
-                        <span>{lead.first_name} {lead.last_name}</span>
+                        <Link href={`/leads/${lead.id}`} className="hover:underline">
+                          {lead.first_name} {lead.last_name}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -233,6 +245,29 @@ export function LeadList() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <DropdownMenuContent align="end">
+                          <Link href={`/leads/${lead.id}`}>
+                            <DropdownMenuItem className="cursor-pointer">
+                              <Edit2 className="mr-2 h-4 w-4" />
+                              <span>View / Edit</span>
+                            </DropdownMenuItem>
+                          </Link>
+                          {currentUser?.role === 'ADMIN' && (
+                            <DeleteLeadDialog leadId={lead.id} triggerContext="icon" />
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

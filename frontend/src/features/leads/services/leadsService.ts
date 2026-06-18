@@ -30,5 +30,10 @@ export const leadsService = {
   async importLeads(data: { leads: CreateLeadPayload[] }): Promise<{ status: string; data: { importedCount: number; skippedCount: number } }> {
     const response = await api.post('/leads/import', data);
     return response.data;
+  },
+
+  async deleteLead(id: string): Promise<{ status: string; message: string }> {
+    const response = await api.delete(`/leads/${id}`);
+    return response.data;
   }
 };

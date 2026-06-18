@@ -86,10 +86,28 @@ const importLeads = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Delete (soft delete) a lead
+ * @route   DELETE /api/v1/leads/:id
+ * @access  Private (Admin only)
+ */
+const deleteLead = catchAsync(async (req, res) => {
+  const tenantId = req.user.tenant_id;
+  const leadId = req.params.id;
+
+  await LeadService.deleteLead(tenantId, leadId);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Lead deleted successfully'
+  });
+});
+
 module.exports = {
   getLeads,
   getLeadById,
   createLead,
   updateLead,
-  importLeads
+  importLeads,
+  deleteLead
 };

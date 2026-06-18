@@ -5,6 +5,7 @@ const { createLeadSchema, updateLeadSchema, importLeadsSchema } = require('../va
 const { createTaskSchema } = require('../validations/task.validation');
 const validate = require('../middlewares/validate.middleware');
 const { requireAuth } = require('../middlewares/auth.middleware');
+const { requireAdmin } = require('../middlewares/role.middleware');
 
 const router = express.Router();
 
@@ -56,6 +57,17 @@ router.patch(
   '/:id',
   validate(updateLeadSchema),
   leadController.updateLead
+);
+
+/**
+ * @route   DELETE /api/v1/leads/:id
+ * @desc    Soft delete an existing lead
+ * @access  Private (Admin only)
+ */
+router.delete(
+  '/:id',
+  requireAdmin,
+  leadController.deleteLead
 );
 
 /**
