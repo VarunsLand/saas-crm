@@ -23,7 +23,7 @@ export function UpcomingActionCenter() {
 
   const isLoading = isTodayLoading || isOverdueLoading || isUpcomingLoading;
 
-  const renderTaskList = (tasks: any[], emptyMessage: string) => {
+  const renderTaskList = (tasks: { id: string, title: string, due_date: string, priority: string, status: string, lead_id?: string, customer_id?: string, lead?: { first_name: string, last_name?: string }, customer?: { first_name: string, last_name?: string } }[], emptyMessage: string) => {
     if (!tasks || tasks.length === 0) {
       return (
         <div className="py-6 flex flex-col items-center justify-center text-slate-500 border border-dashed border-white/5 rounded-xl bg-white/[0.02]">

@@ -11,7 +11,7 @@ export function CustomerGrowthChart() {
   }
 
   const chartData = data?.customerGrowthTrend || [];
-  const hasData = chartData.some((d: any) => d.customers > 0);
+  const hasData = chartData.some((d: { customers: number }) => d.customers > 0);
 
   return (
     <motion.div 

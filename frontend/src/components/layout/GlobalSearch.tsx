@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { searchService } from '@/services/search.service';
+import { searchService, SearchLead, SearchCustomer, SearchTask, SearchNote } from '@/services/search.service';
 import { Search, Users, Target, CheckSquare, FileText, Loader2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDebounce } from '@/hooks/useDebounce'; // Wait, I might need to create this hook if it doesn't exist, or just use a simple state timeout. Let's just use a local timeout.
+
 
 export function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
@@ -117,7 +117,7 @@ export function GlobalSearch() {
                     {data.leads?.length > 0 && (
                       <div className="mb-4">
                         <div className="px-3 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Leads</div>
-                        {data.leads.map((lead: any) => (
+                        {data.leads.map((lead: SearchLead) => (
                           <button key={lead.id} onClick={() => handleSelect(`/leads/${lead.id}`)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 rounded-lg text-left group transition-colors">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
@@ -138,7 +138,7 @@ export function GlobalSearch() {
                     {data.customers?.length > 0 && (
                       <div className="mb-4">
                         <div className="px-3 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customers</div>
-                        {data.customers.map((cust: any) => (
+                        {data.customers.map((cust: SearchCustomer) => (
                           <button key={cust.id} onClick={() => handleSelect(`/customers/${cust.id}`)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 rounded-lg text-left group transition-colors">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
@@ -159,7 +159,7 @@ export function GlobalSearch() {
                     {data.tasks?.length > 0 && (
                       <div className="mb-4">
                         <div className="px-3 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tasks</div>
-                        {data.tasks.map((task: any) => (
+                        {data.tasks.map((task: SearchTask) => (
                           <button key={task.id} onClick={() => handleSelect(`/tasks`)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 rounded-lg text-left group transition-colors">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
@@ -180,7 +180,7 @@ export function GlobalSearch() {
                     {data.notes?.length > 0 && (
                       <div className="mb-4">
                         <div className="px-3 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Notes</div>
-                        {data.notes.map((note: any) => (
+                        {data.notes.map((note: SearchNote) => (
                           <button key={note.id} onClick={() => handleSelect(note.customer_id ? `/customers/${note.customer_id}` : `/leads/${note.lead_id}`)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 rounded-lg text-left group transition-colors">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
@@ -200,7 +200,7 @@ export function GlobalSearch() {
                     {/* Empty */}
                     {!isLoading && data.leads.length === 0 && data.customers.length === 0 && data.tasks.length === 0 && data.notes.length === 0 && (
                       <div className="p-12 text-center text-slate-500 text-sm">
-                        No results found for "{query}".
+                        No results found for &quot;{query}&quot;.
                       </div>
                     )}
                   </div>

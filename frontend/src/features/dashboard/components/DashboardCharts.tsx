@@ -37,7 +37,7 @@ export function DashboardCharts() {
   // Derive exact status counts from real lead data
   const counts = {
     NEW: leads.filter((l) => l.status === 'NEW').length,
-    IN_PROGRESS: leads.filter((l) => l.status === 'IN_PROGRESS').length,
+    IN_PROGRESS: leads.filter((l) => ['CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION'].includes(l.status)).length,
     WON: leads.filter((l) => l.status === 'WON').length,
     LOST: leads.filter((l) => l.status === 'LOST').length,
   };

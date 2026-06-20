@@ -7,6 +7,16 @@ import { motion } from 'framer-motion';
 import { Phone, Mail, Building, Clock, IndianRupee, Activity, FileText, CheckSquare, Target } from 'lucide-react';
 import { format } from 'date-fns';
 
+interface InteractionData { id: string; created_at: string; type: string; notes?: string; }
+interface TaskData { id: string; completed_at: string; status: string; title: string; assignee?: { first_name?: string; last_name?: string }; due_date: string; }
+interface RevenueData { id: string; created_at: string; amount: number; description: string; date: string; }
+interface TimelineEvent {
+  id: string;
+  type: string;
+  date: Date;
+  data: Partial<InteractionData & TaskData & RevenueData>;
+}
+
 export default function CustomerProfilePage() {
   const params = useParams();
   const id = params.id as string;
@@ -34,21 +44,21 @@ export default function CustomerProfilePage() {
 
   const { customer, sourceLead } = data;
 
-  const totalRevenue = customer.revenue_entries?.reduce((acc: number, entry: any) => acc + entry.amount, 0) || 0;
+  const totalRevenue = customer.revenue_entries?.reduce((acc: number, entry: { amount: number }) => acc + entry.amount, 0) || 0;
 
   // Aggregate timeline events
-  const timelineEvents: any[] = [];
+  const timelineEvents: TimelineEvent[] = [];
   
   if (sourceLead) {
     timelineEvents.push({ id: 'lead_created', type: 'LEAD_CREATED', date: new Date(sourceLead.created_at), data: sourceLead });
     
     if (sourceLead.interactions) {
-      sourceLead.interactions.forEach((int: any) => {
+      sourceLead.interactions.forEach((int: InteractionData) => {
         timelineEvents.push({ id: `lead_int_${int.id}`, type: 'INTERACTION', date: new Date(int.created_at), data: int });
       });
     }
     if (sourceLead.follow_up_tasks) {
-      sourceLead.follow_up_tasks.forEach((task: any) => {
+      sourceLead.follow_up_tasks.forEach((task: TaskData) => {
         if (task.status === 'COMPLETED' && task.completed_at) {
           timelineEvents.push({ id: `lead_task_${task.id}`, type: 'TASK_COMPLETED', date: new Date(task.completed_at), data: task });
         }
@@ -59,13 +69,13 @@ export default function CustomerProfilePage() {
   timelineEvents.push({ id: 'customer_created', type: 'CUSTOMER_CREATED', date: new Date(customer.created_at), data: customer });
 
   if (customer.interactions) {
-    customer.interactions.forEach((int: any) => {
+    customer.interactions.forEach((int: InteractionData) => {
       timelineEvents.push({ id: `cust_int_${int.id}`, type: 'INTERACTION', date: new Date(int.created_at), data: int });
     });
   }
   
   if (customer.tasks) {
-    customer.tasks.forEach((task: any) => {
+    customer.tasks.forEach((task: TaskData) => {
       if (task.status === 'COMPLETED' && task.completed_at) {
         timelineEvents.push({ id: `cust_task_${task.id}`, type: 'TASK_COMPLETED', date: new Date(task.completed_at), data: task });
       }
@@ -73,7 +83,7 @@ export default function CustomerProfilePage() {
   }
 
   if (customer.revenue_entries) {
-    customer.revenue_entries.forEach((rev: any) => {
+    customer.revenue_entries.forEach((rev: RevenueData) => {
       timelineEvents.push({ id: `rev_${rev.id}`, type: 'REVENUE', date: new Date(rev.created_at), data: rev });
     });
   }
@@ -136,7 +146,7 @@ export default function CustomerProfilePage() {
 
               {customer.revenue_entries?.length > 0 ? (
                 <div className="space-y-3">
-                  {customer.revenue_entries.map((entry: any) => (
+                  {customer.revenue_entries.map((entry: RevenueData) => (
                     <div key={entry.id} className="flex justify-between items-center p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/[0.07] transition-colors">
                       <div>
                         <div className="font-medium text-slate-200">{entry.description}</div>
@@ -157,7 +167,7 @@ export default function CustomerProfilePage() {
               
               {timelineEvents.length > 0 ? (
                 <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-indigo-500/20 before:via-indigo-500/20 before:to-transparent">
-                  {timelineEvents.map((event: any) => {
+                  {timelineEvents.map((event: TimelineEvent) => {
                     let Icon = FileText;
                     let colorClass = 'text-indigo-400';
                     let bgClass = 'group-[.is-active]:bg-indigo-500/20';
@@ -182,8 +192,8 @@ export default function CustomerProfilePage() {
                       desc = `Completed by ${event.data.assignee?.first_name || 'User'}`;
                     } else if (event.type === 'REVENUE') {
                       Icon = IndianRupee; colorClass = 'text-emerald-400'; bgClass = 'group-[.is-active]:bg-emerald-500/20';
-                      title = `Revenue Added: ₹${event.data.amount.toLocaleString()}`;
-                      desc = event.data.description;
+                      title = `Revenue Added: ₹${event.data.amount?.toLocaleString() ?? '0'}`;
+                      desc = event.data.description || '';
                     }
 
                     return (
@@ -239,7 +249,7 @@ export default function CustomerProfilePage() {
               <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-4"><CheckSquare className="w-5 h-5 text-amber-400" /> Tasks</h2>
               {sourceLead?.follow_up_tasks?.length > 0 ? (
                 <div className="space-y-3">
-                  {sourceLead.follow_up_tasks.map((task: any) => (
+                  {sourceLead.follow_up_tasks.map((task: TaskData) => (
                     <div key={task.id} className="bg-white/5 border border-white/5 rounded-xl p-3">
                       <div className="flex justify-between items-start">
                         <div className="text-sm font-medium text-slate-200">Follow up required</div>

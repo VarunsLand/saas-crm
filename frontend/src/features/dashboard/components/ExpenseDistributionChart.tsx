@@ -13,7 +13,7 @@ export function ExpenseDistributionChart() {
   }
 
   // Aggregate by category
-  const categoryMap = (expenses || []).reduce((acc: any, curr: any) => {
+  const categoryMap = (expenses || []).reduce((acc: Record<string, number>, curr: { category: string, amount: number }) => {
     acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
     return acc;
   }, {});
@@ -64,7 +64,7 @@ export function ExpenseDistributionChart() {
               <Tooltip 
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }}
                 itemStyle={{ color: '#e2e8f0' }}
-                formatter={(value: number) => `₹${value.toLocaleString()}`}
+                formatter={(value) => `₹${Number(value).toLocaleString()}`}
               />
               <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
             </PieChart>

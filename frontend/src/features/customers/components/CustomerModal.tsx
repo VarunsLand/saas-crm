@@ -38,7 +38,7 @@ export function CustomerModal({ isOpen, onClose, onSuccess, customer }: Customer
       }
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch {
       toast.error('Operation failed');
     } finally {
       setLoading(false);

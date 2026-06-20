@@ -11,7 +11,7 @@ export function LeadSourceAnalytics() {
   }
 
   const chartData = data?.leadSources || [];
-  const hasData = chartData.some((d: any) => d.count > 0);
+  const hasData = chartData.some((d: { count: number }) => d.count > 0);
 
   return (
     <motion.div 

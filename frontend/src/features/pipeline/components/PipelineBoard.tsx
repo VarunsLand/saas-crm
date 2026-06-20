@@ -5,8 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { pipelineService } from '../services/pipeline.service';
 import { Lead, LeadStatus } from '@/features/leads/types';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-import { CheckCircle2, User, Phone, Briefcase, Mail } from 'lucide-react';
+import { Phone, Mail } from 'lucide-react';
 
 const COLUMNS: { id: LeadStatus; label: string }[] = [
   { id: 'NEW', label: 'New' },
@@ -48,7 +47,6 @@ export function PipelineBoard() {
     if (!leadToMove) return;
 
     const newStage = destination.droppableId as LeadStatus;
-    const oldStage = source.droppableId as LeadStatus;
 
     // Optimistic Update
     const originalLeads = [...leads];
@@ -68,8 +66,8 @@ export function PipelineBoard() {
       await pipelineService.convertToCustomer(leadId);
       toast.success('Successfully converted Lead to Customer!');
       loadLeads();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to convert lead');
+    } catch {
+      toast.error('Failed to convert lead');
     }
   };
 

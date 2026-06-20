@@ -11,7 +11,7 @@ export function RevenueVsExpenseChart() {
   }
 
   const chartData = data?.revenueExpenseTrend || [];
-  const hasData = chartData.some((d: any) => d.revenue > 0 || d.expense > 0);
+  const hasData = chartData.some((d: { revenue: number, expense: number }) => d.revenue > 0 || d.expense > 0);
 
   return (
     <motion.div 

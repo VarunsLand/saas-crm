@@ -24,7 +24,7 @@ export function TopCustomersWidget() {
           </div>
         ) : (
           <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-            {customers.map((customer: any, idx: number) => (
+            {customers.map((customer: { id: string, name: string, company: string, total_revenue: number }, idx: number) => (
               <li key={customer.id || idx} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-slate-900 dark:text-slate-200">{customer.name}</span>

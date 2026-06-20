@@ -34,7 +34,7 @@ export function RecentRevenueActivity() {
           </div>
         ) : (
           <ul className="divide-y divide-white/5">
-            {recentEntries.map((entry: any, i: number) => (
+            {recentEntries.map((entry: { id: string, amount: number, customer: string, date: string }, i: number) => (
               <motion.li 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
