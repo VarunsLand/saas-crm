@@ -1,4 +1,4 @@
-export type LeadStatus = 'NEW' | 'IN_PROGRESS' | 'WON' | 'LOST';
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'NEGOTIATION' | 'WON' | 'LOST';
 
 export interface Lead {
   id: string;
@@ -12,6 +12,7 @@ export interface Lead {
   service?: string | null;
   description?: string | null;
   status: LeadStatus;
+  converted_to_customer_id?: string | null;
   created_at: string;
   updated_at: string;
 }

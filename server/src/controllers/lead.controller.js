@@ -103,11 +103,56 @@ const deleteLead = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Update lead stage via drag-and-drop
+ * @route   PATCH /api/v1/leads/:id/stage
+ * @access  Private
+ */
+const updateLeadStage = catchAsync(async (req, res) => {
+  const tenantId = req.user.tenant_id;
+  const leadId = req.params.id;
+  const { status } = req.body;
+  const userId = req.user.user_id;
+
+  const validStatuses = ['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ status: 'error', message: 'Invalid lead status' });
+  }
+
+  const lead = await LeadService.updateLeadStage(tenantId, leadId, status, userId);
+
+  res.status(200).json({
+    status: 'success',
+    data: { lead }
+  });
+});
+
+/**
+ * @desc    Convert WON lead into Customer
+ * @route   POST /api/v1/leads/:id/convert
+ * @access  Private
+ */
+const convertToCustomer = catchAsync(async (req, res) => {
+  const tenantId = req.user.tenant_id;
+  const leadId = req.params.id;
+  const userId = req.user.user_id;
+
+  const customer = await LeadService.convertToCustomer(tenantId, leadId, userId);
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Lead successfully converted to Customer',
+    data: { customer }
+  });
+});
+
 module.exports = {
   getLeads,
   getLeadById,
   createLead,
   updateLead,
   importLeads,
-  deleteLead
+  deleteLead,
+  updateLeadStage,
+  convertToCustomer
 };

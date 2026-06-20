@@ -1,8 +1,6 @@
 const express = require('express');
 const leadController = require('../controllers/lead.controller');
-const taskController = require('../controllers/task.controller');
 const { createLeadSchema, updateLeadSchema, importLeadsSchema } = require('../validations/lead.validation');
-const { createTaskSchema } = require('../validations/task.validation');
 const validate = require('../middlewares/validate.middleware');
 const { requireAuth } = require('../middlewares/auth.middleware');
 const { requireAdmin } = require('../middlewares/role.middleware');
@@ -60,6 +58,26 @@ router.patch(
 );
 
 /**
+ * @route   PATCH /api/v1/leads/:id/stage
+ * @desc    Update lead stage via drag-and-drop
+ * @access  Private
+ */
+router.patch(
+  '/:id/stage',
+  leadController.updateLeadStage
+);
+
+/**
+ * @route   POST /api/v1/leads/:id/convert
+ * @desc    Convert WON lead into Customer
+ * @access  Private
+ */
+router.post(
+  '/:id/convert',
+  leadController.convertToCustomer
+);
+
+/**
  * @route   DELETE /api/v1/leads/:id
  * @desc    Soft delete an existing lead
  * @access  Private (Admin only)
@@ -68,17 +86,6 @@ router.delete(
   '/:id',
   requireAdmin,
   leadController.deleteLead
-);
-
-/**
- * @route   POST /api/v1/leads/:leadId/tasks
- * @desc    Create a new task specifically tied to this lead
- * @access  Private
- */
-router.post(
-  '/:leadId/tasks',
-  validate(createTaskSchema),
-  taskController.createTask
 );
 
 module.exports = router;

@@ -10,22 +10,18 @@ const router = express.Router();
 router.use(requireAuth);
 
 /**
- * @route   GET /api/v1/leads/:leadId/interactions
- * @desc    Fetch all historical interactions for a specific lead
- * @access  Private
+ * @route   GET /api/v1/notes
  */
 router.get(
-  '/:leadId/interactions',
-  interactionController.getInteractionsByLeadId
+  '/',
+  interactionController.getInteractions
 );
 
 /**
- * @route   POST /api/v1/leads/:leadId/interactions
- * @desc    Create a new interaction record for a specific lead
- * @access  Private
+ * @route   POST /api/v1/notes
  */
 router.post(
-  '/:leadId/interactions',
+  '/',
   validate(createInteractionSchema),
   interactionController.createInteraction
 );

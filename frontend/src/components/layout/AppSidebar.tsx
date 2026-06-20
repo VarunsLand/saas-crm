@@ -10,9 +10,7 @@ import {
   Target,
   X,
   Hexagon,
-  // BarChart3, // Future-proofing: Reports
-  // Puzzle, // Future-proofing: Integrations
-  // CreditCard, // Future-proofing: Billing
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -23,13 +21,14 @@ interface AppSidebarProps {
 
 const NAVIGATION_ITEMS = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Leads', href: '/leads', icon: Target },
+  { name: 'Pipeline', href: '/pipeline', icon: Target },
+  { name: 'Tasks', href: '/tasks', icon: CheckCircle2 },
+  { name: 'Leads', href: '/leads', icon: Users },
+  { name: 'Customers', href: '/customers', icon: Users },
+  { name: 'Revenue', href: '/revenue', icon: Hexagon },
+  { name: 'Expenses', href: '/expenses', icon: Hexagon },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
-  // Placeholders for future routes
-  // { name: 'Reports', href: '/reports', icon: BarChart3 },
-  // { name: 'Integrations', href: '/integrations', icon: Puzzle },
-  // { name: 'Billing', href: '/billing', icon: CreditCard },
 ];
 
 export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {

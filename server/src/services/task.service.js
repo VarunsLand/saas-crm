@@ -19,32 +19,22 @@ class TaskService {
 
     let dateFilter = {};
     if (filterType === 'TODAY') {
-      dateFilter = {
-        due_date: {
-          gte: startOfToday,
-          lt: endOfToday
-        }
-      };
+      dateFilter = { due_date: { gte: startOfToday, lt: endOfToday } };
     } else if (filterType === 'OVERDUE') {
-      dateFilter = {
-        due_date: {
-          lt: startOfToday
-        }
-      };
+      dateFilter = { due_date: { lt: startOfToday } };
     } else if (filterType === 'UPCOMING') {
-      dateFilter = {
-        due_date: {
-          gte: endOfToday
-        }
-      };
+      dateFilter = { due_date: { gte: endOfToday } };
     }
 
     const whereClause = {
       tenant_id: tenantId,
-      status: 'PENDING', // Only return active tasks
       lead: { deleted_at: null }, // Soft-delete aware: exclude tasks for deleted leads
-      ...dateFilter
     };
+
+    if (filterType !== 'ALL') {
+      whereClause.status = 'PENDING';
+      Object.assign(whereClause, dateFilter);
+    }
 
     if (userId) {
       whereClause.assigned_to = userId;
@@ -53,6 +43,9 @@ class TaskService {
     if (leadId) {
       whereClause.lead_id = leadId;
     }
+    
+    // We should also support querying by customerId, but it isn't strictly requested by GET tasks filters yet.
+    // If needed, we'll add it later.
 
     return prisma.followUpTask.findMany({
       where: whereClause,
@@ -60,6 +53,9 @@ class TaskService {
       include: {
         lead: {
           select: { id: true, first_name: true, last_name: true, status: true, phone_number: true }
+        },
+        customer: {
+          select: { id: true, first_name: true, last_name: true, company: true }
         },
         assignee: {
           select: { id: true, first_name: true, last_name: true }
@@ -74,16 +70,17 @@ class TaskService {
    * @param {string} leadId - The UUID of the lead
    * @param {Object} data - Validated payload containing due_date and assigned_to
    */
-  static async createTask(tenantId, leadId, data) {
-    const { due_date, assigned_to } = data;
+  static async createTask(tenantId, data) {
+    const { due_date, assigned_to, title, description, priority, lead_id, customer_id } = data;
 
-    // 1. Strict boundary check: Verify lead exists, belongs to tenant, and isn't deleted
-    const lead = await prisma.lead.findFirst({
-      where: { id: leadId, tenant_id: tenantId, deleted_at: null }
-    });
-
-    if (!lead) {
-      throw new ApiError(404, 'Lead not found or access denied');
+    if (lead_id) {
+      const lead = await prisma.lead.findFirst({ where: { id: lead_id, tenant_id: tenantId, deleted_at: null }});
+      if (!lead) throw new ApiError(404, 'Lead not found or access denied');
+    } else if (customer_id) {
+      const customer = await prisma.customer.findFirst({ where: { id: customer_id, tenant_id: tenantId, deleted_at: null }});
+      if (!customer) throw new ApiError(404, 'Customer not found or access denied');
+    } else {
+      throw new ApiError(400, 'Task must belong to a lead or customer');
     }
 
     // 2. Strict boundary check: Verify the assigned user exists in the *same* tenant
@@ -95,11 +92,14 @@ class TaskService {
       throw new ApiError(404, 'Assigned user not found or does not belong to this workspace');
     }
 
-    // 3. Create Task safely
     return prisma.followUpTask.create({
       data: {
         tenant_id: tenantId,
-        lead_id: leadId,
+        lead_id: lead_id || null,
+        customer_id: customer_id || null,
+        title,
+        description,
+        priority: priority || 'MEDIUM',
         assigned_to,
         due_date: new Date(due_date),
         status: 'PENDING'

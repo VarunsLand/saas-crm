@@ -1,6 +1,6 @@
 const express = require('express');
 const taskController = require('../controllers/task.controller');
-const { updateTaskSchema } = require('../validations/task.validation');
+const { updateTaskSchema, createTaskSchema } = require('../validations/task.validation');
 const validate = require('../middlewares/validate.middleware');
 const { requireAuth } = require('../middlewares/auth.middleware');
 
@@ -17,6 +17,17 @@ router.use(requireAuth);
 router.get(
   '/',
   taskController.getTasks
+);
+
+/**
+ * @route   POST /api/v1/tasks
+ * @desc    Create a new task
+ * @access  Private
+ */
+router.post(
+  '/',
+  validate(createTaskSchema),
+  taskController.createTask
 );
 
 /**

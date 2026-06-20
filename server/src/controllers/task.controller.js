@@ -37,9 +37,8 @@ const getTasks = catchAsync(async (req, res) => {
  */
 const createTask = catchAsync(async (req, res) => {
   const tenantId = req.user.tenant_id;
-  const leadId = req.params.leadId;
-
-  const task = await TaskService.createTask(tenantId, leadId, req.body);
+  
+  const task = await TaskService.createTask(tenantId, req.body);
 
   res.status(201).json({
     status: 'success',

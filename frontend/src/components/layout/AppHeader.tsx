@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Menu, LogOut, Loader2 } from 'lucide-react';
+import { Menu, LogOut, Loader2, Search } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +24,20 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200/60 bg-white/70 backdrop-blur-xl px-4 sm:px-6 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.02)] transition-all">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
-          <Menu className="h-5 w-5" />
+          <Menu className="h-5 w-5 text-white" />
           <span className="sr-only">Toggle menu</span>
         </Button>
+
+        <button 
+          onClick={() => window.dispatchEvent(new Event('openSearch'))}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#0f172a] hover:bg-[#1e293b] border border-white/10 rounded-md text-sm text-slate-400 transition-colors group"
+        >
+          <Search className="w-4 h-4 text-slate-500 group-hover:text-slate-300" />
+          <span className="w-48 text-left">Search CRM...</span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-medium text-slate-400">
+            ⌘K
+          </kbd>
+        </button>
       </div>
 
       <div className="flex items-center gap-4">

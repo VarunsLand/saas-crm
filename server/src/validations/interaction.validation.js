@@ -16,10 +16,13 @@ const InteractionTypeEnum = z.enum([
 const createInteractionSchema = z.object({
   body: z.object({
     type: InteractionTypeEnum,
+    title: z.string().max(255).optional().nullable(),
     notes: z.string()
       .max(5000, 'Notes cannot exceed 5000 characters')
       .optional()
-      .nullable()
+      .nullable(),
+    leadId: z.string().uuid().optional().nullable(),
+    customerId: z.string().uuid().optional().nullable()
   }).strict() // Disallows undocumented fields in the payload
 });
 

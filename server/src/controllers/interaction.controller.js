@@ -6,11 +6,11 @@ const catchAsync = require('../utils/catchAsync');
  * @route   GET /api/v1/leads/:leadId/interactions
  * @access  Private
  */
-const getInteractionsByLeadId = catchAsync(async (req, res) => {
+const getInteractions = catchAsync(async (req, res) => {
   const tenantId = req.user.tenant_id;
-  const leadId = req.params.leadId; // Assumes routes are structured hierarchically
+  const { leadId, customerId } = req.query; 
 
-  const interactions = await InteractionService.getInteractionsByLeadId(tenantId, leadId);
+  const interactions = await InteractionService.getInteractions(tenantId, { leadId, customerId });
 
   res.status(200).json({
     status: 'success',
@@ -27,13 +27,13 @@ const getInteractionsByLeadId = catchAsync(async (req, res) => {
 const createInteraction = catchAsync(async (req, res) => {
   const tenantId = req.user.tenant_id;
   const userId = req.user.user_id;
-  const leadId = req.params.leadId;
+  const { leadId, customerId, ...data } = req.body;
 
   const interaction = await InteractionService.createInteraction(
     tenantId, 
     userId, 
-    leadId, 
-    req.body
+    { leadId, customerId }, 
+    data
   );
 
   res.status(201).json({
@@ -43,6 +43,6 @@ const createInteraction = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  getInteractionsByLeadId,
+  getInteractions,
   createInteraction
 };

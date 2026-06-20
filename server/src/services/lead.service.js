@@ -161,7 +161,6 @@ class LeadService {
    * @param {string} leadId - The UUID of the lead
    */
   static async deleteLead(tenantId, leadId) {
-    // 1. Verify existence and tenant ownership
     const existingLead = await prisma.lead.findFirst({
       where: {
         id: leadId,
@@ -174,10 +173,86 @@ class LeadService {
       throw new ApiError(404, 'Lead not found or access denied');
     }
 
-    // 2. Perform the soft delete securely using the verified PK
     return prisma.lead.update({
       where: { id: leadId },
       data: { deleted_at: new Date() }
+    });
+  }
+
+  /**
+   * Update lead stage for drag-and-drop pipeline.
+   */
+  static async updateLeadStage(tenantId, leadId, newStage, userId) {
+    const existingLead = await prisma.lead.findFirst({
+      where: { id: leadId, tenant_id: tenantId, deleted_at: null }
+    });
+
+    if (!existingLead) {
+      throw new ApiError(404, 'Lead not found or access denied');
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const updatedLead = await tx.lead.update({
+        where: { id: leadId },
+        data: { status: newStage }
+      });
+
+      if (existingLead.status !== newStage) {
+        await tx.interaction.create({
+          data: {
+            tenant_id: tenantId,
+            lead_id: leadId,
+            user_id: userId,
+            type: 'NOTE',
+            notes: `Moved stage from ${existingLead.status} to ${newStage}`,
+          }
+        });
+      }
+
+      return updatedLead;
+    });
+  }
+
+  /**
+   * Convert WON lead into Customer.
+   */
+  static async convertToCustomer(tenantId, leadId, userId) {
+    const lead = await prisma.lead.findFirst({
+      where: { id: leadId, tenant_id: tenantId, deleted_at: null }
+    });
+
+    if (!lead) {
+      throw new ApiError(404, 'Lead not found or access denied');
+    }
+
+    if (lead.status !== 'WON') {
+      throw new ApiError(400, 'Only WON leads can be converted to Customers');
+    }
+
+    if (lead.converted_to_customer_id) {
+      throw new ApiError(400, 'Lead has already been converted to a Customer');
+    }
+
+    // Use a transaction to ensure atomicity
+    return prisma.$transaction(async (tx) => {
+      // Create the Customer
+      const customer = await tx.customer.create({
+        data: {
+          tenant_id: tenantId,
+          first_name: lead.first_name,
+          last_name: lead.last_name || null,
+          email: lead.email,
+          phone_number: lead.phone_number
+        }
+      });
+
+      // Update the Lead lineage
+      const updatedLead = await tx.lead.update({
+        where: { id: lead.id },
+        data: { converted_to_customer_id: customer.id }
+      });
+
+      return customer;
     });
   }
 }

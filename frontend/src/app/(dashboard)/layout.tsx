@@ -5,6 +5,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { GlobalSearch } from '@/components/layout/GlobalSearch';
+import { QuickActionFAB } from '@/components/layout/QuickActionFAB';
 
 export default function DashboardLayout({
   children,
@@ -47,15 +49,17 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-[#050816]">
       <AppSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <AppHeader onMenuClick={() => setIsSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-transparent relative">
           {children}
         </main>
+        <GlobalSearch />
+        <QuickActionFAB />
       </div>
     </div>
   );

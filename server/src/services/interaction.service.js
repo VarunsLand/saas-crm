@@ -7,26 +7,23 @@ class InteractionService {
    * @param {string} tenantId - The UUID of the tenant
    * @param {string} leadId - The UUID of the lead
    */
-  static async getInteractionsByLeadId(tenantId, leadId) {
-    // 1. Strict security check: Verify lead exists, belongs to tenant, and isn't soft-deleted
-    const lead = await prisma.lead.findFirst({
-      where: {
-        id: leadId,
-        tenant_id: tenantId,
-        deleted_at: null
-      }
-    });
-
-    if (!lead) {
-      throw new ApiError(404, 'Lead not found or access denied');
+  static async getInteractions(tenantId, { leadId, customerId }) {
+    const whereClause = { tenant_id: tenantId };
+    
+    if (leadId) {
+      whereClause.lead_id = leadId;
+      const lead = await prisma.lead.findFirst({ where: { id: leadId, tenant_id: tenantId, deleted_at: null }});
+      if (!lead) throw new ApiError(404, 'Lead not found');
+    } else if (customerId) {
+      whereClause.customer_id = customerId;
+      const customer = await prisma.customer.findFirst({ where: { id: customerId, tenant_id: tenantId, deleted_at: null }});
+      if (!customer) throw new ApiError(404, 'Customer not found');
+    } else {
+      throw new ApiError(400, 'Must provide leadId or customerId');
     }
 
-    // 2. Fetch interactions (they are inherently safe now, but we enforce tenant_id anyway)
     return prisma.interaction.findMany({
-      where: {
-        tenant_id: tenantId,
-        lead_id: leadId
-      },
+      where: whereClause,
       orderBy: { created_at: 'desc' },
       include: {
         user: {
@@ -43,26 +40,23 @@ class InteractionService {
    * @param {string} leadId - The UUID of the lead
    * @param {Object} data - The validated interaction payload (e.g., type, notes)
    */
-  static async createInteraction(tenantId, userId, leadId, data) {
-    // 1. Strict security check: Verify lead ownership to prevent cross-tenant injection
-    const lead = await prisma.lead.findFirst({
-      where: {
-        id: leadId,
-        tenant_id: tenantId,
-        deleted_at: null
-      }
-    });
-
-    if (!lead) {
-      throw new ApiError(404, 'Lead not found or access denied');
+  static async createInteraction(tenantId, userId, { leadId, customerId }, data) {
+    if (leadId) {
+      const lead = await prisma.lead.findFirst({ where: { id: leadId, tenant_id: tenantId, deleted_at: null }});
+      if (!lead) throw new ApiError(404, 'Lead not found');
+    } else if (customerId) {
+      const customer = await prisma.customer.findFirst({ where: { id: customerId, tenant_id: tenantId, deleted_at: null }});
+      if (!customer) throw new ApiError(404, 'Customer not found');
+    } else {
+      throw new ApiError(400, 'Must provide leadId or customerId');
     }
 
-    // 2. Create the interaction securely, overriding relation IDs with verified context
     return prisma.interaction.create({
       data: {
         ...data,
         tenant_id: tenantId,
-        lead_id: leadId,
+        lead_id: leadId || null,
+        customer_id: customerId || null,
         user_id: userId
       },
       include: {

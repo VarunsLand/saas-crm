@@ -1,76 +1,47 @@
 'use client';
 
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { DashboardMetrics } from '@/features/dashboard/components/DashboardMetrics';
-import { DashboardActivity } from '@/features/dashboard/components/DashboardActivity';
-import { DashboardCharts } from '@/features/dashboard/components/DashboardCharts';
-import { RecentLeadsWidget } from '@/features/dashboard/components/RecentLeadsWidget';
-import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboard';
+import dynamic from 'next/dynamic';
+import { KPIHeader } from '@/features/dashboard/components/KPIHeader';
+import { BusinessInsightsWidget } from '@/features/dashboard/components/BusinessInsightsWidget';
+import { RecentRevenueActivity } from '@/features/dashboard/components/RecentRevenueActivity';
+import { UpcomingActionCenter } from '@/features/dashboard/components/UpcomingActionCenter';
+
+const RevenueVsExpenseChart = dynamic(() => import('@/features/dashboard/components/RevenueVsExpenseChart').then(mod => mod.RevenueVsExpenseChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
+const ProfitTrendChart = dynamic(() => import('@/features/dashboard/components/ProfitTrendChart').then(mod => mod.ProfitTrendChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
+const CustomerGrowthChart = dynamic(() => import('@/features/dashboard/components/CustomerGrowthChart').then(mod => mod.CustomerGrowthChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
+const LeadSourceAnalytics = dynamic(() => import('@/features/dashboard/components/LeadSourceAnalytics').then(mod => mod.LeadSourceAnalytics), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
+const ExpenseDistributionChart = dynamic(() => import('@/features/dashboard/components/ExpenseDistributionChart').then(mod => mod.ExpenseDistributionChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
 
 export default function DashboardPage() {
-  const { currentUser } = useAuth();
-  const { data } = useDashboardMetrics();
-  const metrics = data?.data?.metrics;
-
-  if (!currentUser) return null;
-
-  // Time-based greeting logic
-  const hour = new Date().getHours();
-  let greeting = 'Good Evening';
-  if (hour < 12) greeting = 'Good Morning';
-  else if (hour < 17) greeting = 'Good Afternoon';
-
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="flex-1 w-full bg-[#050816] text-slate-200 selection:bg-indigo-500/30">
+      <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-6">
         
-        {/* Row 1: Premium Welcome Card */}
-        <div className="bg-white dark:bg-slate-950 p-6 sm:p-8 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm relative overflow-hidden">
-          {/* Subtle background decoration */}
-          <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl opacity-50 pointer-events-none" />
-          
-          <div className="relative z-10">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
-              {greeting}, {currentUser.first_name} <span className="inline-block hover:animate-wave origin-bottom-right">👋</span>
-            </h1>
-            
-            {metrics ? (
-              <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl leading-relaxed">
-                You currently have <strong className="font-semibold text-slate-900 dark:text-slate-200">{metrics.total_leads} total leads</strong>, with <strong className="font-semibold text-slate-900 dark:text-slate-200">{metrics.leads_won} active opportunities</strong> and <strong className="font-semibold text-slate-900 dark:text-slate-200">{metrics.tasks_due_today} tasks</strong> requiring your attention today.
-              </p>
-            ) : (
-              <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl leading-relaxed h-7 bg-slate-100 dark:bg-slate-800 animate-pulse rounded w-3/4 mt-2" />
-            )}
+        {/* Row 1: KPIs */}
+        <KPIHeader />
+
+        {/* Row 2: Main Financials */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RevenueVsExpenseChart />
+          <ProfitTrendChart />
+        </div>
+
+        {/* Row 3: Secondary Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ExpenseDistributionChart />
+          <CustomerGrowthChart />
+          <LeadSourceAnalytics />
+        </div>
+
+        {/* Row 4: Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <UpcomingActionCenter />
+          <div className="space-y-6 flex flex-col">
+            <BusinessInsightsWidget />
+            <RecentRevenueActivity />
           </div>
         </div>
 
-        {/* Row 2: KPI Metrics */}
-        <section>
-          <DashboardMetrics />
-        </section>
-
-        {/* Row 3: Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column (2/3 width on desktop) */}
-          <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white dark:bg-slate-950 p-6 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm overflow-hidden">
-              <DashboardCharts />
-            </section>
-            
-            <section className="bg-white dark:bg-slate-950 p-6 rounded-3xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm min-h-[400px]">
-              <DashboardActivity />
-            </section>
-          </div>
-
-          {/* Right Column (1/3 width on desktop) */}
-          <div className="lg:col-span-1">
-            <section className="h-full sticky top-8">
-              <RecentLeadsWidget />
-            </section>
-          </div>
-          
-        </div>
       </div>
     </div>
   );

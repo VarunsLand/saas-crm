@@ -17,30 +17,34 @@ export default function SettingsPage() {
   } = useSettings();
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="flex flex-col min-h-full bg-[#050816] text-slate-200">
+      <div className="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          <h1 className="text-3xl font-semibold tracking-tight text-white">
             Workspace Settings
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Manage your workspace configuration and preferences.
           </p>
         </div>
 
-        <WorkspaceProfileSettings 
-          profile={profile}
-          isLoading={isProfileLoading}
-          onUpdate={updateProfile}
-          isUpdating={isUpdatingProfile}
-        />
+        <div className="bg-[#0B1220] border border-white/10 shadow-2xl rounded-xl overflow-hidden p-6">
+          <WorkspaceProfileSettings 
+            profile={profile}
+            isLoading={isProfileLoading}
+            onUpdate={updateProfile}
+            isUpdating={isUpdatingProfile}
+          />
+        </div>
 
-        <LeadSourcesSettings
-          sources={leadSources}
-          isLoading={isLeadSourcesLoading}
-          onCreate={createLeadSource}
-          isCreating={isCreatingLeadSource}
-        />
+        <div className="bg-[#0B1220] border border-white/10 shadow-2xl rounded-xl overflow-hidden p-6">
+          <LeadSourcesSettings
+            sources={leadSources}
+            isLoading={isLeadSourcesLoading}
+            onCreate={createLeadSource}
+            isCreating={isCreatingLeadSource}
+          />
+        </div>
       </div>
     </div>
   );
