@@ -1,34 +1,34 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
+import { useDashboard } from './useDashboard';
 
 export const useFinancialKPIs = () => {
-  return useQuery({
-    queryKey: ['financial', 'kpis'],
-    queryFn: async () => {
-      const response = await api.get('/financial/kpi');
-      return response.data.data;
-    },
-  });
+  const query = useDashboard();
+  return { ...query, data: query.data?.kpis };
 };
 
 export const useFinancialInsights = () => {
-  return useQuery({
-    queryKey: ['financial', 'insights'],
-    queryFn: async () => {
-      const response = await api.get('/financial/insights');
-      return response.data.data;
-    },
-  });
+  const query = useDashboard();
+  return { 
+    ...query, 
+    data: {
+      leadSources: query.data?.leadSources,
+      topCustomers: query.data?.topCustomers,
+      recentRevenue: query.data?.recentActivity,
+      businessInsights: query.data?.insights
+    } 
+  };
 };
 
 export function useFinancialCharts() {
-  return useQuery({
-    queryKey: ['financial', 'charts'],
-    queryFn: async () => {
-      const { data } = await api.get('/financial/charts');
-      return data.data;
-    }
-  });
+  const query = useDashboard();
+  return { 
+    ...query, 
+    data: {
+      revenueExpenseTrend: query.data?.trends,
+      customerGrowthTrend: query.data?.customerGrowth
+    } 
+  };
 }
 
 export function useExpenses() {

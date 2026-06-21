@@ -4,8 +4,12 @@ import { expenseService, ExpenseEntry } from '@/services/expense.service';
 import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2, Search, Filter, Activity } from 'lucide-react';
 import { ExpenseModal } from '@/features/expenses/components/ExpenseModal';
+import { ExpenseAnalyticsBarChart } from '@/features/expenses/components/ExpenseAnalyticsBarChart';
+import { EmptyState } from '@/components/ui/empty-state';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { formatIndianCurrency } from '@/lib/utils';
 
 export default function ExpensesPage() {
   const [entries, setEntries] = useState<ExpenseEntry[]>([]);
@@ -58,6 +62,12 @@ export default function ExpensesPage() {
           </Button>
         </motion.div>
 
+        {!loading && entries.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <ExpenseAnalyticsBarChart entries={entries} />
+          </motion.div>
+        )}
+
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-[#0B1220] border border-white/10 shadow-2xl rounded-xl overflow-hidden flex flex-col">
           
           <div className="p-4 border-b border-white/5 flex gap-4 items-center bg-white/[0.02]">
@@ -77,21 +87,53 @@ export default function ExpensesPage() {
 
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="p-12 text-center text-slate-500 animate-pulse font-mono text-sm">Synchronizing ledger...</div>
+              <div className="p-4">
+                <TableSkeleton columns={5} rows={3} />
+              </div>
             ) : error ? (
               <div className="p-12 text-center text-red-400">{error}</div>
             ) : filtered.length === 0 ? (
-              <div className="p-20 text-center flex flex-col items-center">
-                <div className="h-16 w-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
-                  <Activity className="h-8 w-8 text-red-400" />
-                </div>
-                <h3 className="text-xl font-medium text-white mb-2">No expenses recorded</h3>
-                <p className="text-slate-500 max-w-sm mb-6">Your ledger is empty. Log your first operational expense to track your profit margins.</p>
-                <Button onClick={() => { setSelectedEntry(null); setModalOpen(true); }} className="bg-white/5 hover:bg-white/10 text-white border border-white/10">
-                  Log Expense
-                </Button>
-              </div>
+              <EmptyState
+                icon={Activity}
+                title="No expenses recorded"
+                description="Your ledger is empty. Log your first operational expense to track your profit margins."
+                action={{ label: 'Log Expense', onClick: () => { setSelectedEntry(null); setModalOpen(true); } }}
+              />
             ) : (
+          <div className="w-full">
+            {/* Mobile View: Cards */}
+            <div className="grid grid-cols-1 gap-4 md:hidden p-4">
+              {filtered.map((e) => (
+                <div key={e.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-3 relative group">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="bg-white/10 border border-white/10 px-2 py-1 rounded-md text-[10px] text-slate-300 font-semibold tracking-wide uppercase">
+                        {e.category}
+                      </span>
+                      <div className="text-xs text-slate-400 mt-2">
+                        {new Date(e.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                    {/* Keep simple persistent actions on mobile or dropdown */}
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(e)} className="h-8 w-8 text-slate-400 hover:text-white">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(e.id)} className="h-8 w-8 text-red-400 hover:text-red-300">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-end mt-2 pt-3 border-t border-white/5">
+                    <span className="text-sm text-slate-300 truncate max-w-[200px]">{e.description || 'No description'}</span>
+                    <span className="font-mono text-red-400 font-bold">-{formatIndianCurrency(e.amount)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-[#0B1220] sticky top-0 border-b border-white/10 text-slate-500 uppercase tracking-wider text-[11px] font-semibold">
                   <tr>
@@ -116,7 +158,7 @@ export default function ExpensesPage() {
                       </td>
                       <td className="px-6 py-4 text-slate-400">{e.description || '-'}</td>
                       <td className="px-6 py-4 font-mono text-red-400 font-semibold text-base">
-                        -₹{e.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        -{formatIndianCurrency(e.amount)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -128,7 +170,9 @@ export default function ExpensesPage() {
                   ))}
                 </tbody>
               </table>
-            )}
+            </div>
+          </div>
+          )}
           </div>
         </motion.div>
       </div>

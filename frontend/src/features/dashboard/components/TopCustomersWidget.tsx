@@ -1,5 +1,8 @@
 'use client';
 import { useFinancialInsights } from '../hooks/useFinancialAnalytics';
+import { formatIndianCurrency } from '@/lib/utils';
+import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
+import { Crown } from 'lucide-react';
 
 export function TopCustomersWidget() {
   const { data, isLoading } = useFinancialInsights();
@@ -19,9 +22,11 @@ export function TopCustomersWidget() {
       
       <div className="flex-1 overflow-auto">
         {customers.length === 0 ? (
-          <div className="p-6 text-center flex flex-col items-center justify-center h-full text-slate-500 text-sm">
-            No customer revenue data yet
-          </div>
+          <DashboardEmptyState 
+            icon={<Crown className="w-5 h-5 opacity-50" />}
+            title="No Top Customers"
+            description="Close deals to see your highest value accounts."
+          />
         ) : (
           <ul className="divide-y divide-slate-100 dark:divide-slate-800">
             {customers.map((customer: { id: string, name: string, company: string, total_revenue: number }, idx: number) => (
@@ -31,7 +36,7 @@ export function TopCustomersWidget() {
                   <span className="text-xs text-slate-500">{customer.company}</span>
                 </div>
                 <div className="text-sm font-mono font-medium text-slate-900 dark:text-slate-100">
-                  ₹{customer.total_revenue.toLocaleString()}
+                  {formatIndianCurrency(customer.total_revenue)}
                 </div>
               </li>
             ))}

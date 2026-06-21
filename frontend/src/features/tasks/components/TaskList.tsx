@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { Task } from '../types';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function TaskList({ leadId }: { leadId: string }) {
   const { data, isLoading, isError, refetch, isRefetching } = useTasks(leadId);
@@ -43,13 +44,12 @@ export function TaskList({ leadId }: { leadId: string }) {
             </Button>
           </div>
         ) : tasks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground border-2 border-dashed rounded-md p-6">
-            <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-full mb-4">
-              <CalendarClock className="w-8 h-8 text-slate-400" />
-            </div>
-            <p className="font-medium text-slate-900 dark:text-slate-100">No follow-up tasks scheduled</p>
-            <p className="text-sm mt-1 mb-4">Schedule a task to stay on top of this lead.</p>
-          </div>
+          <EmptyState
+            icon={CalendarClock}
+            title="No follow-up tasks scheduled"
+            description="Schedule a task to stay on top of this lead."
+            className="p-6 h-48"
+          />
         ) : (
           <div className="space-y-4 mt-4">
             {tasks.map((task: Task) => {

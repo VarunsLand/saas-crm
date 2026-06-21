@@ -2,6 +2,8 @@
 import { useFinancialCharts } from '../hooks/useFinancialAnalytics';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
+import { Users } from 'lucide-react';
 
 export function CustomerGrowthChart() {
   const { data, isLoading } = useFinancialCharts();
@@ -29,9 +31,11 @@ export function CustomerGrowthChart() {
       
       <div className="flex-1 w-full min-h-[200px] z-10">
         {!hasData ? (
-           <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-             <span className="font-mono text-xs border border-dashed border-slate-700 px-4 py-2 rounded-lg">NO DATA</span>
-           </div>
+           <DashboardEmptyState 
+             icon={<Users className="w-5 h-5 opacity-50" />}
+             title="No Customer Growth Yet"
+             description="Once you close deals, your customer growth over time will appear here."
+           />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

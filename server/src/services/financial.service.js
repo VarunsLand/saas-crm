@@ -42,10 +42,15 @@ const getKPIs = async (tenantId) => {
   });
 
   const qualifiedLeads = await prisma.lead.count({
-    where: { tenant_id: tenantId, status: 'IN_PROGRESS', deleted_at: null }
+    where: { tenant_id: tenantId, status: { in: ['QUALIFIED', 'PROPOSAL', 'NEGOTIATION'] }, deleted_at: null }
   });
 
-  const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+  const lostLeads = await prisma.lead.count({
+    where: { tenant_id: tenantId, status: 'LOST', deleted_at: null }
+  });
+
+  const totalClosed = wonLeads + lostLeads;
+  const conversionRate = totalClosed > 0 ? (wonLeads / totalClosed) * 100 : 0;
 
   return {
     totalRevenue,
@@ -185,14 +190,69 @@ const getBusinessInsights = async (tenantId) => {
   const topCusts = await getTopCustomers(tenantId);
   const bestCust = topCusts[0];
 
-  // Best Month
   const trends = await getFinancialTrends(tenantId);
-  const bestMonth = trends.sort((a, b) => b.revenue - a.revenue)[0];
+  const currentMonth = trends.length > 0 ? trends[trends.length - 1] : { revenue: 0, expense: 0 };
+  const lastMonth = trends.length > 1 ? trends[trends.length - 2] : { revenue: 0, expense: 0 };
+
+  let revenueGrowthStr = "Revenue data is currently insufficient to calculate growth.";
+  if (lastMonth.revenue > 0) {
+    const growth = ((currentMonth.revenue - lastMonth.revenue) / lastMonth.revenue) * 100;
+    if (growth >= 0) {
+       revenueGrowthStr = `Revenue increased ${growth.toFixed(1)}% compared to last month.`;
+    } else {
+       revenueGrowthStr = `Revenue decreased ${Math.abs(growth).toFixed(1)}% compared to last month.`;
+    }
+  } else if (currentMonth.revenue > 0) {
+    revenueGrowthStr = `Revenue is up this month.`;
+  }
+
+  let expenseGrowthStr = "Expense data is currently insufficient to calculate growth.";
+  if (lastMonth.expense > 0) {
+    const growth = ((currentMonth.expense - lastMonth.expense) / lastMonth.expense) * 100;
+    if (growth >= 0) {
+       expenseGrowthStr = `Expenses increased ${growth.toFixed(1)}% compared to last month.`;
+    } else {
+       expenseGrowthStr = `Expenses decreased ${Math.abs(growth).toFixed(1)}% compared to last month.`;
+    }
+  } else if (currentMonth.expense > 0) {
+    expenseGrowthStr = `Expenses are up this month.`;
+  }
+
+  const topCustomerStr = bestCust && bestCust.total_revenue > 0 
+    ? `${bestCust.name} generated the most revenue this quarter (₹${bestCust.total_revenue}).`
+    : "No major customer revenue generated this quarter.";
+
+  const topLeadSourceStr = bestSource && bestSource.count > 0
+    ? `${bestSource.name} generated the highest number of leads.`
+    : "No distinct top lead source this period.";
 
   return {
-    bestSource: bestSource?.count > 0 ? bestSource.name : 'N/A',
-    topCustomer: bestCust?.total_revenue > 0 ? bestCust.name : 'N/A',
-    bestMonth: bestMonth?.revenue > 0 ? bestMonth.month : 'N/A'
+    revenueGrowth: revenueGrowthStr,
+    expenseGrowth: expenseGrowthStr,
+    topCustomer: topCustomerStr,
+    topLeadSource: topLeadSourceStr
+  };
+};
+
+const getDashboardData = async (tenantId) => {
+  const [kpis, trends, insights, customerGrowth, recentActivity, topCustomers, leadSources] = await Promise.all([
+    getKPIs(tenantId),
+    getFinancialTrends(tenantId),
+    getBusinessInsights(tenantId),
+    getCustomerGrowthTrend(tenantId),
+    getRecentRevenue(tenantId),
+    getTopCustomers(tenantId),
+    getLeadSourceAnalytics(tenantId)
+  ]);
+
+  return {
+    kpis,
+    trends,
+    customerGrowth,
+    insights,
+    recentActivity,
+    topCustomers,
+    leadSources
   };
 };
 
@@ -203,5 +263,6 @@ module.exports = {
   getFinancialTrends,
   getCustomerGrowthTrend,
   getRecentRevenue,
-  getBusinessInsights
+  getBusinessInsights,
+  getDashboardData
 };

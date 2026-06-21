@@ -2,6 +2,9 @@
 import { useFinancialCharts } from '../hooks/useFinancialAnalytics';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import { formatIndianCurrency } from '@/lib/utils';
+import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
+import { LineChart } from 'lucide-react';
 
 export function RevenueVsExpenseChart() {
   const { data, isLoading } = useFinancialCharts();
@@ -35,12 +38,11 @@ export function RevenueVsExpenseChart() {
       
       <div className="flex-1 w-full z-10">
         {!hasData ? (
-          <div className="h-full flex flex-col items-center justify-center text-slate-500 text-sm">
-            <div className="w-16 h-16 mb-4 rounded-full border border-dashed border-slate-700 flex items-center justify-center">
-              <span className="text-slate-600 font-mono text-xs">NO DATA</span>
-            </div>
-            Log revenue or expenses to generate chart
-          </div>
+          <DashboardEmptyState 
+            icon={<LineChart className="w-5 h-5 opacity-50" />}
+            title="Awaiting Financial Data"
+            description="Log your first revenue or expense to see comparative trends."
+          />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
@@ -56,14 +58,16 @@ export function RevenueVsExpenseChart() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(val) => `₹${val/1000}k`} />
+              <YAxis yAxisId="left" orientation="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#10b981' }} tickFormatter={(val) => formatIndianCurrency(val)} />
+              <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#ef4444' }} tickFormatter={(val) => formatIndianCurrency(val)} />
               <Tooltip 
+                formatter={(value: unknown) => formatIndianCurrency(value as number)}
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f8fafc', fontSize: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }}
                 itemStyle={{ color: '#e2e8f0' }}
                 cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '3 3' }}
               />
-              <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
-              <Area type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" />
+              <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
+              <Area yAxisId="right" type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#colorExp)" />
             </AreaChart>
           </ResponsiveContainer>
         )}

@@ -9,5 +9,6 @@ router.use(requireAuth);
 router.get('/kpi', financialController.getDashboardKPIs);
 router.get('/insights', financialController.getInsights);
 router.get('/charts', financialController.getCharts);
+router.get('/dashboard', financialController.getDashboard);
 
 module.exports = router;

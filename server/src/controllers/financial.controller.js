@@ -43,8 +43,19 @@ const getCharts = catchAsync(async (req, res) => {
   });
 });
 
+const getDashboard = catchAsync(async (req, res) => {
+  const tenantId = req.user.tenant_id;
+  const dashboardData = await financialService.getDashboardData(tenantId);
+
+  res.status(200).json({
+    status: 'success',
+    data: dashboardData
+  });
+});
+
 module.exports = {
   getDashboardKPIs,
   getInsights,
-  getCharts
+  getCharts,
+  getDashboard
 };

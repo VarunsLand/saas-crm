@@ -2,6 +2,9 @@
 import { useFinancialCharts } from '../hooks/useFinancialAnalytics';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import { formatIndianCurrency } from '@/lib/utils';
+import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
+import { TrendingUp } from 'lucide-react';
 
 export function ProfitTrendChart() {
   const { data, isLoading } = useFinancialCharts();
@@ -34,16 +37,19 @@ export function ProfitTrendChart() {
       
       <div className="flex-1 w-full min-h-[200px] z-10">
         {!hasData ? (
-           <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-             <span className="font-mono text-xs border border-dashed border-slate-700 px-4 py-2 rounded-lg">NO DATA</span>
-           </div>
+           <DashboardEmptyState 
+             icon={<TrendingUp className="w-5 h-5 opacity-50" />}
+             title="No Profit Data Yet"
+             description="Log revenue and expenses to visualize your profit trajectory."
+           />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(val) => `₹${val/1000}k`} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(val) => formatIndianCurrency(val)} />
               <Tooltip 
+                formatter={(value: unknown) => formatIndianCurrency(value as number)}
                 contentStyle={{ backgroundColor: '#0f172a', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }}
                 itemStyle={{ color: '#e2e8f0' }}
                 cursor={{ stroke: 'rgba(255,255,255,0.1)' }}

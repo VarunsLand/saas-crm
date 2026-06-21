@@ -10,8 +10,7 @@ const RevenueVsExpenseChart = dynamic(() => import('@/features/dashboard/compone
 const ProfitTrendChart = dynamic(() => import('@/features/dashboard/components/ProfitTrendChart').then(mod => mod.ProfitTrendChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
 const CustomerGrowthChart = dynamic(() => import('@/features/dashboard/components/CustomerGrowthChart').then(mod => mod.CustomerGrowthChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
 const LeadSourceAnalytics = dynamic(() => import('@/features/dashboard/components/LeadSourceAnalytics').then(mod => mod.LeadSourceAnalytics), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
-const ExpenseDistributionChart = dynamic(() => import('@/features/dashboard/components/ExpenseDistributionChart').then(mod => mod.ExpenseDistributionChart), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
-
+const TopExpensesWidget = dynamic(() => import('@/features/dashboard/components/TopExpensesWidget').then(mod => mod.TopExpensesWidget), { ssr: false, loading: () => <div className="h-[300px] bg-white/5 animate-pulse border border-white/10 rounded-2xl" /> });
 export default function DashboardPage() {
   return (
     <div className="flex-1 w-full bg-[#050816] text-slate-200 selection:bg-indigo-500/30">
@@ -28,7 +27,7 @@ export default function DashboardPage() {
 
         {/* Row 3: Secondary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ExpenseDistributionChart />
+          <TopExpensesWidget />
           <CustomerGrowthChart />
           <LeadSourceAnalytics />
         </div>

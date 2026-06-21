@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
  * Intercepts all rejected promises, thrown ApiErrors, and Prisma database failures.
  */
 const globalErrorHandler = (err, req, res, next) => {
+  console.error("GLOBAL ERROR HANDLER:", err);
   let statusCode = err.statusCode || 500;
   let errorType = err.name || 'InternalServerError';
   let message = err.message || 'An unexpected server error occurred.';

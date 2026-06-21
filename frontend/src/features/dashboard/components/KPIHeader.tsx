@@ -9,6 +9,8 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { formatIndianCurrency } from '@/lib/utils';
+
 const container: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -25,7 +27,7 @@ const item: Variants = {
 import { memo } from 'react';
 
 export const KPIHeader = memo(function KPIHeader() {
-  const { data, isLoading } = useFinancialKPIs();
+  const { data, isLoading, isError } = useFinancialKPIs();
 
   if (isLoading) {
     return (
@@ -37,16 +39,23 @@ export const KPIHeader = memo(function KPIHeader() {
     );
   }
 
-  const formatCurrency = (val: number) => `₹${(val || 0).toLocaleString()}`;
+  if (isError) {
+    return (
+      <div className="w-full p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center justify-center h-[104px]">
+        Unable to load data. Please try again later.
+      </div>
+    );
+  }
+
   const funnel = data?.funnel;
 
   const kpis = [
     { label: 'Total Leads', value: funnel?.totalLeads || 0, icon: Target, trend: null },
     { label: 'Total Customers', value: data?.activeCustomers || 0, icon: Users, trend: data?.customerGrowth },
     { label: 'Conversion Rate', value: `${data?.conversionRate || 0}%`, icon: TrendingUp, trend: null },
-    { label: 'Revenue', value: formatCurrency(data?.totalRevenue), icon: IndianRupee, trend: null },
-    { label: 'Expenses', value: formatCurrency(data?.totalExpenses), icon: TrendingDown, trend: null },
-    { label: 'Net Profit', value: formatCurrency(data?.netProfit), icon: IndianRupee, trend: null, highlight: true }
+    { label: 'Revenue', value: formatIndianCurrency(data?.totalRevenue), icon: IndianRupee, trend: null },
+    { label: 'Expenses', value: formatIndianCurrency(data?.totalExpenses), icon: TrendingDown, trend: null },
+    { label: 'Net Profit', value: formatIndianCurrency(data?.netProfit), icon: IndianRupee, trend: null, highlight: true }
   ];
 
   return (

@@ -16,6 +16,8 @@ import { CopyButton } from '@/components/ui/copy-button';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { DeleteLeadDialog } from './DeleteLeadDialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
   Table,
   TableBody,
@@ -42,18 +44,12 @@ export function LeadList() {
 
   if (isLoading) {
     return (
-      <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/60">
+      <Card className="shadow-sm border-border bg-card">
         <CardContent className="p-0">
-          <div className="p-4 border-b">
-            <div className="h-10 w-full max-w-sm bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
+          <div className="p-4 border-b border-border">
+            <div className="h-10 w-full max-w-sm bg-muted rounded animate-pulse" />
           </div>
-          <div className="p-4 space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <div className="h-12 w-full bg-slate-200 dark:bg-slate-800 rounded animate-pulse" />
-              </div>
-            ))}
-          </div>
+          <TableSkeleton columns={5} rows={5} />
         </CardContent>
       </Card>
     );
@@ -185,94 +181,143 @@ export function LeadList() {
         </div>
 
         {filteredLeads.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800/80 rounded-full flex items-center justify-center mb-4">
-              <Target className="w-8 h-8 text-slate-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">No leads found</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
-              {leads.length === 0 ? 'Get started by creating your first lead.' : 'Try adjusting your search criteria.'}
-            </p>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="No leads found"
+            description={leads.length === 0 ? 'Start building your sales pipeline by creating your first lead.' : 'Try adjusting your search criteria.'}
+          />
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
-                <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="font-medium">Name</TableHead>
-                  <TableHead className="font-medium">Contact Info</TableHead>
-                  <TableHead className="font-medium">Status</TableHead>
-                  <TableHead className="font-medium">Created</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLeads.map((lead) => (
-                  <TableRow
-                    key={lead.id}
-                    className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800/50 last:border-0"
-                  >
-                    <TableCell className="font-medium text-slate-900 dark:text-slate-100">
-                      <div className="flex items-center gap-3">
-                        <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} />
-                        <Link href={`/leads/${lead.id}`} className="hover:underline">
+          <div className="w-full">
+            {/* Mobile View: Cards */}
+            <div className="grid grid-cols-1 gap-4 md:hidden p-4">
+              {filteredLeads.map((lead) => (
+                <div key={lead.id} className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3 shadow-sm relative">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} />
+                      <div>
+                        <Link href={`/leads/${lead.id}`} className="font-medium hover:underline text-slate-100">
                           {lead.first_name} {lead.last_name}
                         </Link>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{lead.email || '—'}</span>
-                        {lead.email && (
-                          <>
-                            <CopyButton text={lead.email} className="w-5 h-5" />
-                            <EmailButton email={lead.email} className="w-5 h-5 min-h-0 min-w-0" />
-                          </>
+                    </div>
+                    {/* Mobile: Keep Dropdown Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                      <DropdownMenuContent align="end">
+                        <Link href={`/leads/${lead.id}`}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            <span>View / Edit</span>
+                          </DropdownMenuItem>
+                        </Link>
+                        {currentUser?.role === 'ADMIN' && (
+                          <DeleteLeadDialog leadId={lead.id} triggerContext="icon" />
                         )}
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">{lead.phone_number}</span>
-                        {lead.phone_number && (
-                          <>
-                            <CopyButton text={lead.phone_number} className="w-5 h-5" />
-                            <WhatsAppButton phoneNumber={lead.phone_number} className="w-5 h-5 min-h-0 min-w-0" />
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Email</span>
+                      <span className="text-right truncate max-w-[200px]">{lead.email || '—'}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1 border-b border-border/50">
+                      <span className="text-muted-foreground">Phone</span>
+                      <span className="text-right font-mono">{lead.phone_number || '—'}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                      <span className="text-muted-foreground">Status</span>
                       <LeadStatusBadge status={lead.status} />
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          }
-                        />
-                        <DropdownMenuContent align="end">
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Table with Hover Actions */}
+            <div className="hidden md:block overflow-x-auto w-full">
+              <Table>
+                <TableHeader className="bg-transparent border-b border-border">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="font-medium text-muted-foreground h-10">Name</TableHead>
+                    <TableHead className="font-medium text-muted-foreground h-10">Contact Info</TableHead>
+                    <TableHead className="font-medium text-muted-foreground h-10">Status</TableHead>
+                    <TableHead className="font-medium text-muted-foreground h-10">Created</TableHead>
+                    <TableHead className="w-[120px] h-10"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLeads.map((lead) => (
+                    <TableRow
+                      key={lead.id}
+                      className="group transition-colors hover:bg-muted/30 border-b border-border/50 last:border-0 h-16"
+                    >
+                      <TableCell className="font-medium text-slate-100">
+                        <div className="flex items-center gap-3">
+                          <LeadAvatar firstName={lead.first_name} lastName={lead.last_name} />
+                          <Link href={`/leads/${lead.id}`} className="hover:underline">
+                            {lead.first_name} {lead.last_name}
+                          </Link>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm truncate max-w-[200px]">{lead.email || '—'}</span>
+                          {lead.email && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <CopyButton text={lead.email} className="w-5 h-5" />
+                              <EmailButton email={lead.email} className="w-5 h-5 min-h-0 min-w-0" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground font-mono">{lead.phone_number}</span>
+                          {lead.phone_number && (
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <CopyButton text={lead.phone_number} className="w-5 h-5" />
+                              <WhatsAppButton phoneNumber={lead.phone_number} className="w-5 h-5 min-h-0 min-w-0" />
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <LeadStatusBadge status={lead.status} />
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground font-mono">
+                        {formatDistanceToNow(new Date(lead.created_at), { addSuffix: true })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {/* Desktop: Inline Hover Actions */}
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link href={`/leads/${lead.id}`}>
-                            <DropdownMenuItem className="cursor-pointer">
-                              <Edit2 className="mr-2 h-4 w-4" />
-                              <span>View / Edit</span>
-                            </DropdownMenuItem>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-transparent border-border hover:bg-muted">
+                              <Edit2 className="h-4 w-4 text-muted-foreground" />
+                            </Button>
                           </Link>
                           {currentUser?.role === 'ADMIN' && (
-                            <DeleteLeadDialog leadId={lead.id} triggerContext="icon" />
+                            <div className="inline-block">
+                              <DeleteLeadDialog leadId={lead.id} triggerContext="icon" />
+                            </div>
                           )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </CardContent>

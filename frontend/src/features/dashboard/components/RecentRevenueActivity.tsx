@@ -2,7 +2,9 @@
 import { useFinancialInsights } from '../hooks/useFinancialAnalytics';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { IndianRupee } from 'lucide-react';
+import { IndianRupee, History } from 'lucide-react';
+import { formatIndianCurrency } from '@/lib/utils';
+import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
 
 export function RecentRevenueActivity() {
   const { data, isLoading } = useFinancialInsights();
@@ -18,7 +20,7 @@ export function RecentRevenueActivity() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.8 }}
-      className="bg-[#0B1220] rounded-xl border border-white/10 shadow-2xl flex flex-col h-full overflow-hidden relative"
+      className="bg-[#0B1220] rounded-xl border border-white/10 shadow-2xl flex flex-col w-full shrink-0 h-auto overflow-hidden relative"
     >
       <div className="p-5 border-b border-white/5 z-10 flex justify-between items-center">
         <div>
@@ -29,9 +31,11 @@ export function RecentRevenueActivity() {
       
       <div className="flex-1 overflow-auto p-2 z-10">
         {recentEntries.length === 0 ? (
-          <div className="h-full min-h-[150px] flex items-center justify-center text-slate-500 text-sm">
-             <span className="font-mono text-xs border border-dashed border-slate-700 px-4 py-2 rounded-lg">NO DATA</span>
-          </div>
+          <DashboardEmptyState 
+            icon={<History className="w-5 h-5 opacity-50" />}
+            title="No Activity Yet"
+            description="Your recent revenue logging activity will appear here."
+          />
         ) : (
           <ul className="divide-y divide-white/5">
             {recentEntries.map((entry: { id: string, amount: number, customer: string, date: string }, i: number) => (
@@ -52,7 +56,7 @@ export function RecentRevenueActivity() {
                   </div>
                 </div>
                 <div className="text-sm font-mono font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full">
-                  +₹{entry.amount.toLocaleString()}
+                  +{formatIndianCurrency(entry.amount)}
                 </div>
               </motion.li>
             ))}
