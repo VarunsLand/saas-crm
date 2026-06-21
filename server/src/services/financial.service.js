@@ -13,8 +13,10 @@ const getKPIs = async (tenantId) => {
   });
   const totalExpenses = expenseResult._sum.amount || 0;
 
-  const netProfit = totalRevenue - totalExpenses;
-
+  const grossSales = totalRevenue;
+  const netProfit = grossSales - totalExpenses;
+  const profitMargin = grossSales > 0 ? Number(((netProfit / grossSales) * 100).toFixed(1)) : 0;
+  const expenseRatio = grossSales > 0 ? Number(((totalExpenses / grossSales) * 100).toFixed(1)) : 0;
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -50,12 +52,15 @@ const getKPIs = async (tenantId) => {
   });
 
   const totalClosed = wonLeads + lostLeads;
-  const conversionRate = totalClosed > 0 ? (wonLeads / totalClosed) * 100 : 0;
+  const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
 
   return {
+    grossSales,
     totalRevenue,
     totalExpenses,
     netProfit,
+    profitMargin,
+    expenseRatio,
     activeCustomers: currentCustomers,
     customerGrowth: parseFloat(customerGrowth.toFixed(1)),
     conversionRate: parseFloat(conversionRate.toFixed(1)),

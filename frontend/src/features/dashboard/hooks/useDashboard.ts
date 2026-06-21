@@ -3,9 +3,12 @@ import api from '@/services/api';
 import { Interaction } from '@/features/interactions/types';
 
 export interface DashboardKPIs {
+  grossSales: number;
   totalRevenue: number;
   totalExpenses: number;
   netProfit: number;
+  profitMargin: number;
+  expenseRatio: number;
   activeCustomers: number;
   customerGrowth: number;
   conversionRate: number;
