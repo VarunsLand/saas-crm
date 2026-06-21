@@ -8,13 +8,20 @@ import { DashboardEmptyState } from '@/components/ui/DashboardEmptyState';
 import { TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+export interface ProfitTrendPoint {
+  month: string;
+  profit: number;
+}
+
 export function ProfitTrendChart() {
   const { data, isLoading } = useFinancialCharts();
 
-  const fullData = (data?.revenueExpenseTrend || []).map((d: { month: string, revenue: number, expense: number }) => ({
-    month: d.month,
-    profit: d.revenue - d.expense
-  }));
+  const fullData: ProfitTrendPoint[] = useMemo(() => {
+    return (data?.revenueExpenseTrend || []).map((d: { month: string, revenue: number, expense: number }) => ({
+      month: d.month,
+      profit: d.revenue - d.expense
+    }));
+  }, [data?.revenueExpenseTrend]);
 
   const [timeRange, setTimeRange] = useState<'3M' | '6M' | '12M' | 'RANGE'>('12M');
   const [rangeStartIdx, setRangeStartIdx] = useState<number>(0);
@@ -71,7 +78,7 @@ export function ProfitTrendChart() {
         <div className="flex flex-col items-end gap-3">
           <div className="flex items-center gap-2 bg-slate-800/50 p-1 rounded-lg border border-slate-700/50">
             {['3M', '6M', '12M', 'Range'].map((range) => {
-              const val = range.toUpperCase() as any;
+              const val = range.toUpperCase() as '3M' | '6M' | '12M' | 'RANGE';
               return (
                 <button
                   key={range}
@@ -103,7 +110,7 @@ export function ProfitTrendChart() {
             onChange={(e) => setTempStartIdx(Number(e.target.value))}
             className="bg-[#0f172a] border border-slate-700 rounded text-slate-300 px-2 py-1.5 outline-none focus:border-indigo-500 cursor-pointer"
           >
-            {fullData.map((d: any, idx: number) => (
+            {fullData.map((d: ProfitTrendPoint, idx: number) => (
               <option key={`start-${idx}`} value={idx} disabled={idx > tempEndIdx}>{d.month}</option>
             ))}
           </select>
@@ -113,7 +120,7 @@ export function ProfitTrendChart() {
             onChange={(e) => setTempEndIdx(Number(e.target.value))}
             className="bg-[#0f172a] border border-slate-700 rounded text-slate-300 px-2 py-1.5 outline-none focus:border-indigo-500 cursor-pointer"
           >
-            {fullData.map((d: any, idx: number) => (
+            {fullData.map((d: ProfitTrendPoint, idx: number) => (
               <option key={`end-${idx}`} value={idx} disabled={idx < tempStartIdx}>{d.month}</option>
             ))}
           </select>
