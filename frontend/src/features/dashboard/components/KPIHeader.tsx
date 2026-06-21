@@ -1,6 +1,6 @@
 'use client';
 import { useFinancialKPIs } from '../hooks/useFinancialAnalytics';
-import { Users, Target, IndianRupee, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Users, Target, IndianRupee, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, type LucideIcon } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -25,6 +25,15 @@ const item: Variants = {
 };
 
 import { memo } from 'react';
+
+interface KPICardData {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  trend?: number | null;
+  highlight?: boolean;
+  valueColor?: string;
+}
 
 export const KPIHeader = memo(function KPIHeader() {
   const { data, isLoading, isError } = useFinancialKPIs();
@@ -84,7 +93,7 @@ export const KPIHeader = memo(function KPIHeader() {
     { label: 'Total Leads', value: funnel?.totalLeads || 0, icon: Users }
   ];
 
-  const renderKpiCard = (kpi: any, idx: number) => {
+  const renderKpiCard = (kpi: KPICardData) => {
     const Icon = kpi.icon;
     const hasTrend = typeof kpi.trend === 'number' && !isNaN(kpi.trend);
     const isPositiveTrend = hasTrend && (kpi.trend as number) >= 0;
@@ -140,7 +149,7 @@ export const KPIHeader = memo(function KPIHeader() {
           <span className="text-xs text-slate-500">Cash Flow & Sustainability</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {financialKpis.map((kpi, idx) => renderKpiCard(kpi, idx))}
+          {financialKpis.map((kpi) => renderKpiCard(kpi))}
         </div>
       </div>
 
@@ -151,7 +160,7 @@ export const KPIHeader = memo(function KPIHeader() {
           <span className="text-xs text-slate-500">Efficiency & Pipeline</span>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {operationalKpis.map((kpi, idx) => renderKpiCard(kpi, idx))}
+          {operationalKpis.map((kpi) => renderKpiCard(kpi))}
         </div>
       </div>
     </motion.div>
