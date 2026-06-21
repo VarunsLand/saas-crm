@@ -10,7 +10,7 @@ export function ProfitTrendChart() {
     return <div className="h-[250px] w-full bg-white/5 border border-white/10 rounded-xl animate-pulse" />;
   }
 
-  const chartData = (data?.revenueExpenseTrend || []).map((d: { date: string, revenue: number, expense: number }) => ({
+  const chartData = (data?.revenueExpenseTrend || []).map((d: { month: string, revenue: number, expense: number }) => ({
     month: d.month,
     profit: d.revenue - d.expense
   }));

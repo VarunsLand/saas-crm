@@ -29,12 +29,13 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, entry }: ExpenseModal
     e.preventDefault();
     setLoading(true);
     try {
-      if (entry) await expenseService.update(entry.id, formData);
-      else await expenseService.create(formData);
+      const payload = { ...formData, amount: parseFloat(formData.amount) || 0 };
+      if (entry) await expenseService.update(entry.id, payload);
+      else await expenseService.create(payload);
       toast.success(entry ? 'Expense updated' : 'Expense recorded');
       onSuccess();
       onClose();
-    } catch (error: any) { toast.error('Operation failed'); } finally { setLoading(false); }
+    } catch { toast.error('Operation failed'); } finally { setLoading(false); }
   };
 
   return (

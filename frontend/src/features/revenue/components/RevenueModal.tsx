@@ -33,12 +33,13 @@ export function RevenueModal({ isOpen, onClose, onSuccess, entry }: RevenueModal
     e.preventDefault();
     setLoading(true);
     try {
-      if (entry) await revenueService.update(entry.id, formData);
-      else await revenueService.create(formData);
+      const payload = { ...formData, amount: parseFloat(formData.amount) || 0 };
+      if (entry) await revenueService.update(entry.id, payload);
+      else await revenueService.create(payload);
       toast.success(entry ? 'Revenue updated' : 'Revenue recorded');
       onSuccess();
       onClose();
-    } catch (error: any) { toast.error('Operation failed'); } finally { setLoading(false); }
+    } catch { toast.error('Operation failed'); } finally { setLoading(false); }
   };
 
   return (

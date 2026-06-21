@@ -10,7 +10,10 @@ export function LeadStatusBadge({ status, className }: { status: LeadStatus, cla
           bg: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800', 
           dot: 'bg-blue-500' 
         };
-      case 'IN_PROGRESS':
+      case 'CONTACTED':
+      case 'QUALIFIED':
+      case 'PROPOSAL':
+      case 'NEGOTIATION':
         return { 
           bg: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800', 
           dot: 'bg-amber-500' 
@@ -34,7 +37,7 @@ export function LeadStatusBadge({ status, className }: { status: LeadStatus, cla
   };
 
   const config = getStatusConfig();
-  const label = status === 'IN_PROGRESS' ? 'In Progress' : status.charAt(0) + status.slice(1).toLowerCase();
+  const label = status.charAt(0) + status.slice(1).toLowerCase();
 
   return (
     <Badge 
