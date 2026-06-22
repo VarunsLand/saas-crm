@@ -67,6 +67,53 @@ const emailService = {
       console.error('Failed to send password reset email:', error);
       throw error;
     }
+  },
+
+  /**
+   * Sends an invoice email with PDF attachment using Resend
+   */
+  async sendInvoiceEmail(invoice, pdfBuffer) {
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_dummy') {
+      console.log(`[DEV MODE] Invoice Email triggered for ${invoice.customer_email}`);
+      return { id: 'dev_dummy_id' };
+    }
+
+    try {
+      const fromEmail = process.env.EMAIL_FROM_ADDRESS || 'noreply@saas-crm.example.com';
+      const companyName = 'SaaS CRM'; // Or fetch from Tenant
+
+      const data = await resend.emails.send({
+        from: `${companyName} <${fromEmail}>`,
+        to: invoice.customer_email,
+        subject: `Invoice ${invoice.invoice_number}`,
+        text: `Hello ${invoice.customer_name},
+
+Please find your invoice attached.
+
+Invoice Number: ${invoice.invoice_number}
+Invoice Date: ${new Date(invoice.invoice_date).toLocaleDateString()}
+Due Date: ${invoice.due_date ? new Date(invoice.due_date).toLocaleDateString() : 'N/A'}
+
+Total Amount: ₹${invoice.total.toFixed(2)}
+
+Thank you for your business.
+
+Regards,
+${companyName}`,
+        attachments: [
+          {
+            filename: `${invoice.invoice_number}.pdf`,
+            content: pdfBuffer,
+          },
+        ],
+      });
+
+      console.log(`Invoice email sent to ${invoice.customer_email}. ID: ${data.id}`);
+      return data;
+    } catch (error) {
+      console.error('Failed to send invoice email:', error);
+      throw error;
+    }
   }
 };
 

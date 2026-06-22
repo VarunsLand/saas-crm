@@ -27,6 +27,7 @@ const NAVIGATION_ITEMS = [
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Revenue', href: '/revenue', icon: Hexagon },
   { name: 'Expenses', href: '/expenses', icon: Hexagon },
+  { name: 'Billing', href: '/billing', icon: Target },
   { name: 'Users', href: '/users', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

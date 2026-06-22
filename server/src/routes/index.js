@@ -23,6 +23,7 @@ router.use('/settings', settingsRoutes);
 router.use('/financial', require('./financial.routes'));
 router.use('/revenue', require('./revenue.routes'));
 router.use('/expenses', require('./expense.routes'));
+router.use('/invoices', require('./invoice.routes'));
 router.use('/search', require('./search.routes'));
 
 module.exports = router;

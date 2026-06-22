@@ -45,6 +45,14 @@ enum TaskStatus {
   CANCELLED
 }
 
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
 model Tenant {
   id         String       @id @default(uuid()) @db.Uuid
   name       String       @db.VarChar(255)
@@ -64,6 +72,7 @@ model Tenant {
   customers       Customer[]
   revenue_entries RevenueEntry[]
   expense_entries ExpenseEntry[]
+  invoices        Invoice[]
 
   @@map("tenants")
 }
@@ -262,4 +271,51 @@ model ExpenseEntry {
 
   @@index([tenant_id, date(sort: Desc)])
   @@map("expense_entries")
+}
+
+model Invoice {
+  id              String        @id @default(uuid()) @db.Uuid
+  tenant_id       String        @db.Uuid
+  invoice_number  String        @db.VarChar(50)
+  customer_name   String        @db.VarChar(255)
+  customer_email  String?       @db.VarChar(255)
+  customer_phone  String?       @db.VarChar(50)
+  invoice_date    DateTime      @db.Timestamptz
+  due_date        DateTime?     @db.Timestamptz
+  subtotal        Float
+  tax             Float         @default(0)
+  gst_rate        Float         @default(18)
+  gst_amount      Float         @default(0)
+  total           Float
+  amount_paid     Float         @default(0)
+  balance_due     Float         @default(0)
+  notes           String?       @db.Text
+  status          InvoiceStatus @default(DRAFT)
+  sentAt          DateTime?     @map("sent_at") @db.Timestamptz
+  created_at      DateTime      @default(now()) @db.Timestamptz
+  updated_at      DateTime      @updatedAt @db.Timestamptz
+
+  tenant          Tenant        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  items           InvoiceItem[]
+
+  @@unique([tenant_id, invoice_number])
+  @@index([tenant_id, invoice_date(sort: Desc)])
+  @@index([tenant_id, status])
+  @@index([tenant_id, customer_name])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  invoice_id  String   @db.Uuid
+  description String   @db.VarChar(255)
+  quantity    Float
+  rate        Float
+  amount      Float
+  created_at  DateTime @default(now()) @db.Timestamptz
+
+  invoice     Invoice  @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+
+  @@index([invoice_id])
+  @@map("invoice_items")
 }
