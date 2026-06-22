@@ -43,7 +43,7 @@ export default function InvoiceDetailPage() {
       await invoiceService.delete(invoice!.id);
       toast.success('Invoice deleted');
       router.push('/billing');
-    } catch (err) {
+    } catch (err: unknown) {
       toast.error('Failed to delete invoice');
     }
   };
@@ -53,7 +53,7 @@ export default function InvoiceDetailPage() {
       await invoiceService.updateStatus(invoice!.id, status);
       toast.success(`Invoice marked as ${status}`);
       loadData();
-    } catch (err) {
+    } catch (err: unknown) {
       toast.error('Failed to update status');
     }
   };
@@ -64,7 +64,7 @@ export default function InvoiceDetailPage() {
     try {
       await invoiceService.downloadPdf(invoice.id, invoice.invoice_number);
       toast.success('PDF downloaded successfully');
-    } catch (err) {
+    } catch (err: unknown) {
       toast.error('Failed to download PDF');
     } finally {
       setDownloadingPdf(false);
@@ -78,8 +78,9 @@ export default function InvoiceDetailPage() {
       await invoiceService.sendInvoice(invoice.id);
       toast.success('Invoice emailed successfully!');
       loadData();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to send invoice email');
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      toast.error(axiosError.response?.data?.message || 'Failed to send invoice email');
     } finally {
       setSendingEmail(false);
     }
