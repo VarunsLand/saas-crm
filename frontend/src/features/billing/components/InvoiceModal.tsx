@@ -55,8 +55,8 @@ export function InvoiceModal({ isOpen, onClose, onSuccess }: InvoiceModalProps) 
     if (field === 'quantity' || field === 'rate') {
       item[field] = parseFloat(value as string) || 0;
       item.amount = item.quantity * item.rate;
-    } else {
-      (item as any)[field] = value;
+    } else if (field === 'description') {
+      item.description = value as string;
     }
     
     newItems[index] = item;
